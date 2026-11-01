@@ -8,7 +8,8 @@ Tarayıcıda çalışan sade bir metronom. Tek dosya, kurulum gerektirmez: `inde
 - Ölçüler: 2/4, 3/4, 4/4, 5/4, 6/8, 7/8, 9/8, 12/8
 - Ölçü başında zil: açıkken her ölçünün ilk vuruşu daha tiz tıklar, kapalıyken tüm vuruşlar aynıdır
 - Ses seviyesi ayarı
-- Üç tık sesi: Tahta, Klave, Yumuşak (hoparlörüne en uygun olanı seç; seçim her cihazda ayrı hatırlanır)
+- Üç tık sesi: Klave (varsayılan), Yumuşak, Tahta. Hoparlörüne en uygun olanı seç; seçim her cihazda ayrı hatırlanır
+- Telefonda dik ekrana tam sığar; iPhone sessiz modda da çalar
 - Ayarlar tarayıcıda hatırlanır
 
 ## Klavye
