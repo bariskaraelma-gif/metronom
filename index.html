@@ -57,6 +57,15 @@
   }
   h1 { margin: 0; font-size: 15px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .flags { display: flex; gap: 6px; }
+  .flags button {
+    padding: 3px; border: 2px solid transparent; border-radius: 7px; background: none;
+    cursor: pointer; opacity: .45; transition: opacity .15s;
+  }
+  .flags button:hover { opacity: .8; }
+  .flags button[aria-pressed="true"] { opacity: 1; border-color: var(--ink); }
+  .flags svg { display: block; border-radius: 2px; }
   .beats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; min-height: 28px; }
   .dot {
     width: 22px; height: 22px; border-radius: 50%; background: var(--beat-off);
@@ -136,8 +145,15 @@
     .dot { width: 18px; height: 18px; }
   }
   @media (max-width: 520px) and (max-height: 600px) {
-    h1 { display: none; }
+    h1 { visibility: hidden; }
+    .device { gap: 6px; }
+    .top { justify-content: flex-end; }
+    .flags button { padding: 1px; }
+    .flags svg { width: 26px; height: 17px; }
+    .bpm { font-size: 46px; }
     .bpm-label { margin-top: 2px; }
+    .round { width: 38px; height: 38px; }
+    .meters button { padding-block: 6px; }
     .section-label { margin-bottom: 4px; }
   }
   @media (hover: none) { .hint { display: none; } }
@@ -146,24 +162,46 @@
 <body>
 
 <main class="device">
-  <h1>Karaelma Metronom</h1>
+  <div class="top">
+    <h1>Karaelma Metronom</h1>
+    <div class="flags" id="flags">
+      <button data-lang="tr" aria-pressed="true" aria-label="Türkçe" title="Türkçe">
+        <svg viewBox="0 0 30 20" width="30" height="20" aria-hidden="true">
+          <rect width="30" height="20" fill="#E30A17"/>
+          <circle cx="11.25" cy="10" r="5" fill="#fff"/>
+          <circle cx="12.5" cy="10" r="4" fill="#E30A17"/>
+          <polygon fill="#fff" points="14.1,10 15.83,9.44 15.83,7.62 16.9,9.09 18.62,8.53 17.56,10 18.62,11.47 16.9,10.91 15.83,12.38 15.83,10.56"/>
+        </svg>
+      </button>
+      <button data-lang="en" aria-pressed="false" aria-label="English" title="English">
+        <svg viewBox="0 0 60 30" width="30" height="20" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <clipPath id="ukT"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
+          <rect width="60" height="30" fill="#012169"/>
+          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+          <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#ukT)" stroke="#C8102E" stroke-width="4"/>
+          <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+          <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 
   <div class="beats" id="beats" aria-hidden="true"></div>
 
   <div class="tempo">
     <div class="bpm" id="bpmView">100</div>
-    <div class="bpm-label">vuruş / dakika</div>
+    <div class="bpm-label" data-i18n="bpmLabel">vuruş / dakika</div>
     <div class="tempo-name" id="tempoName">Moderato</div>
   </div>
 
   <div class="bpm-row">
-    <button class="round" id="minus" aria-label="Tempoyu 1 azalt">−</button>
+    <button class="round" id="minus" data-i18n-aria="minus" aria-label="Tempoyu 1 azalt">−</button>
     <input type="range" id="bpm" min="30" max="250" value="100" aria-label="Tempo">
-    <button class="round" id="plus" aria-label="Tempoyu 1 artır">+</button>
+    <button class="round" id="plus" data-i18n-aria="plus" aria-label="Tempoyu 1 artır">+</button>
   </div>
 
   <div>
-    <div class="section-label">Ölçü</div>
+    <div class="section-label" data-i18n="meter">Ölçü</div>
     <div class="meters" id="meters">
       <button data-beats="2">2/4</button>
       <button data-beats="3">3/4</button>
@@ -177,38 +215,38 @@
   </div>
 
   <div>
-    <div class="section-label"><label for="volume">Ses</label></div>
+    <div class="section-label"><label for="volume" data-i18n="volume">Ses</label></div>
     <input type="range" id="volume" min="0" max="100" value="90">
   </div>
 
   <div>
-    <div class="section-label">Tık sesi</div>
+    <div class="section-label" data-i18n="sound">Tık sesi</div>
     <div class="meters sounds" id="sounds">
-      <button data-sound="tahta">Tahta</button>
-      <button data-sound="klave" aria-pressed="true">Klave</button>
-      <button data-sound="yumusak">Yumuşak</button>
+      <button data-sound="tahta" data-i18n="tahta">Tahta</button>
+      <button data-sound="klave" data-i18n="klave" aria-pressed="true">Klave</button>
+      <button data-sound="yumusak" data-i18n="yumusak">Yumuşak</button>
     </div>
   </div>
 
   <label class="bell-toggle" for="bell">
-    <span>Ölçü başında zil<small>Açıkken ilk vuruş daha tiz tıklar; kapalıyken tüm vuruşlar aynı</small></span>
+    <span><span data-i18n="bell">Ölçü başında zil</span><small data-i18n="bellNote">Açıkken ilk vuruş daha tiz tıklar; kapalıyken tüm vuruşlar aynı</small></span>
     <span class="switch"><input type="checkbox" id="bell" checked><span class="track"></span></span>
   </label>
 
   <button class="start" id="start">Başlat</button>
-  <p class="hint">Boşluk: başlat/durdur · ↑↓ tempo ±1 · Shift+↑↓ ±10</p>
+  <p class="hint" data-i18n="hint">Boşluk: başlat/durdur · ↑↓ tempo ±1 · Shift+↑↓ ±10</p>
 </main>
 
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  const state = { bpm: 100, beats: 4, bell: true, volume: 90, sound: "klave", running: false };
+  const state = { bpm: 100, beats: 4, bell: true, volume: 90, sound: "klave", lang: "tr", running: false };
 
   try {
     const saved = JSON.parse(localStorage.getItem("metronom") || "{}");
     Object.assign(state, saved, { running: false });
   } catch (e) {}
-  const save = () => { try { localStorage.setItem("metronom", JSON.stringify({ bpm: state.bpm, beats: state.beats, bell: state.bell, volume: state.volume, sound: state.sound })); } catch (e) {} };
+  const save = () => { try { localStorage.setItem("metronom", JSON.stringify({ bpm: state.bpm, beats: state.beats, bell: state.bell, volume: state.volume, sound: state.sound, lang: state.lang })); } catch (e) {} };
 
   let ctx = null, master = null, noise = null, nextTime = 0, beatIndex = 0, timer = null;
   const LOOKAHEAD = 0.1; // saniye
@@ -329,14 +367,42 @@
     unlockAudio();
     state.running = true; beatIndex = 0; nextTime = ctx.currentTime + 0.05;
     schedule(); timer = setInterval(schedule, 25);
-    $("start").textContent = "Durdur"; $("start").classList.add("running");
+    $("start").textContent = t("stop"); $("start").classList.add("running");
   }
   function stop() {
     state.running = false; clearInterval(timer);
     if (silentAudio) silentAudio.pause();
     for (const d of $("beats").children) d.classList.remove("on");
-    $("start").textContent = "Başlat"; $("start").classList.remove("running");
+    $("start").textContent = t("start"); $("start").classList.remove("running");
   }
+
+  const texts = {
+    tr: {
+      bpmLabel: "vuruş / dakika", meter: "Ölçü", volume: "Ses", sound: "Tık sesi",
+      tahta: "Tahta", klave: "Klave", yumusak: "Yumuşak",
+      bell: "Ölçü başında zil", bellNote: "Açıkken ilk vuruş daha tiz tıklar; kapalıyken tüm vuruşlar aynı",
+      start: "Başlat", stop: "Durdur", hint: "Boşluk: başlat/durdur · ↑↓ tempo ±1 · Shift+↑↓ ±10",
+      minus: "Tempoyu 1 azalt", plus: "Tempoyu 1 artır"
+    },
+    en: {
+      bpmLabel: "beats / minute", meter: "Time signature", volume: "Volume", sound: "Click sound",
+      tahta: "Woodblock", klave: "Clave", yumusak: "Soft",
+      bell: "Accent on beat one", bellNote: "On: the first beat clicks higher; off: all beats sound the same",
+      start: "Start", stop: "Stop", hint: "Space: start/stop · ↑↓ tempo ±1 · Shift+↑↓ ±10",
+      minus: "Decrease tempo by 1", plus: "Increase tempo by 1"
+    }
+  };
+  const t = key => texts[state.lang][key];
+  function setLang(lang) {
+    state.lang = texts[lang] ? lang : "tr";
+    document.documentElement.lang = state.lang;
+    for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
+    for (const el of document.querySelectorAll("[data-i18n-aria]")) el.setAttribute("aria-label", t(el.dataset.i18nAria));
+    $("start").textContent = t(state.running ? "stop" : "start");
+    for (const b of $("flags").children) b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang));
+    save();
+  }
+  $("flags").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setLang(b.dataset.lang); });
 
   const names = [[40, "Grave"], [60, "Largo"], [66, "Larghetto"], [76, "Adagio"], [108, "Andante"], [120, "Moderato"], [156, "Allegro"], [176, "Vivace"], [200, "Presto"], [999, "Prestissimo"]];
   function setBpm(v) {
@@ -384,6 +450,7 @@
   setSound(state.sound);
   $("bell").checked = state.bell;
   setBell(state.bell);
+  setLang(state.lang);
   setBpm(state.bpm);
   setBeats(state.beats);
 })();
