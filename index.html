@@ -71,6 +71,8 @@
     color: var(--ink); font: 500 16px var(--font-mono); cursor: pointer;
   }
   .meters button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+  .meters.sounds { grid-template-columns: repeat(3, 1fr); }
+  .meters.sounds button { font: 500 15px var(--font-display); }
   .section-label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 
   .bell-toggle {
@@ -135,6 +137,15 @@
     <input type="range" id="volume" min="0" max="100" value="90">
   </div>
 
+  <div>
+    <div class="section-label">Tık sesi</div>
+    <div class="meters sounds" id="sounds">
+      <button data-sound="tahta" aria-pressed="true">Tahta</button>
+      <button data-sound="klave">Klave</button>
+      <button data-sound="yumusak">Yumuşak</button>
+    </div>
+  </div>
+
   <label class="bell-toggle" for="bell">
     <span>Ölçü başında zil<small>Açıkken ilk vuruş daha tiz tıklar; kapalıyken tüm vuruşlar aynı</small></span>
     <span class="switch"><input type="checkbox" id="bell" checked><span class="track"></span></span>
@@ -147,13 +158,13 @@
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  const state = { bpm: 100, beats: 4, bell: true, volume: 90, running: false };
+  const state = { bpm: 100, beats: 4, bell: true, volume: 90, sound: "tahta", running: false };
 
   try {
     const saved = JSON.parse(localStorage.getItem("metronom") || "{}");
     Object.assign(state, saved, { running: false });
   } catch (e) {}
-  const save = () => { try { localStorage.setItem("metronom", JSON.stringify({ bpm: state.bpm, beats: state.beats, bell: state.bell, volume: state.volume })); } catch (e) {} };
+  const save = () => { try { localStorage.setItem("metronom", JSON.stringify({ bpm: state.bpm, beats: state.beats, bell: state.bell, volume: state.volume, sound: state.sound })); } catch (e) {} };
 
   let ctx = null, master = null, noise = null, nextTime = 0, beatIndex = 0, timer = null;
   const LOOKAHEAD = 0.1; // saniye
@@ -170,8 +181,12 @@
   }
   const applyVolume = () => { if (master) master.gain.value = state.volume / 100; };
 
-  // Tahta blok benzeri tık: inen perdeli ton + filtrelenmiş gürültü vuruşu
   function click(t, strong) {
+    ({ tahta, klave, yumusak })[state.sound](t, strong);
+  }
+
+  // Tahta blok benzeri tık: inen perdeli ton + filtrelenmiş gürültü vuruşu
+  function tahta(t, strong) {
     const f = strong ? 1800 : 1100;
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = "triangle";
@@ -189,6 +204,37 @@
     ng.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
     n.connect(bp).connect(ng).connect(master);
     n.start(t);
+  }
+
+  // Klave: perdesi kaymayan, hızla sönen birkaç uyumsuz kısmi + çok kısa vuruş gürültüsü
+  function klave(t, strong) {
+    const f = strong ? 1400 : 950;
+    for (const [ratio, amp, dur] of [[1, 0.6, 0.05], [2.57, 0.25, 0.03], [4.2, 0.12, 0.015]]) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = f * ratio;
+      g.gain.setValueAtTime(amp, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g).connect(master);
+      o.start(t); o.stop(t + dur + 0.01);
+    }
+    const n = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), ng = ctx.createGain();
+    n.buffer = noise;
+    hp.type = "highpass"; hp.frequency.value = 2000;
+    ng.gain.setValueAtTime(0.25, t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.005);
+    n.connect(hp).connect(ng).connect(master);
+    n.start(t);
+  }
+
+  // Yumuşak: tek, saf ve kısa bir ton
+  function yumusak(t, strong) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.value = strong ? 1000 : 700;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.9, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+    o.connect(g).connect(master);
+    o.start(t); o.stop(t + 0.07);
   }
 
   function schedule() {
@@ -252,6 +298,19 @@
 
   $("volume").addEventListener("input", e => { state.volume = +e.target.value; applyVolume(); save(); });
   $("volume").value = state.volume;
+  const setSound = s => {
+    state.sound = s;
+    for (const b of $("sounds").children) b.setAttribute("aria-pressed", String(b.dataset.sound === s));
+    save();
+  };
+  $("sounds").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    setSound(b.dataset.sound);
+    // Durmuşken seçilirse sesi bir kez çalarak dinlet
+    if (!state.running) { if (!ctx) setupAudio(); ctx.resume(); click(ctx.currentTime + 0.02, false); }
+  });
+  if (!["tahta", "klave", "yumusak"].includes(state.sound)) state.sound = "tahta";
+  setSound(state.sound);
   $("bell").checked = state.bell;
   setBell(state.bell);
   setBpm(state.bpm);
