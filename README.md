@@ -7,7 +7,7 @@ Tarayıcıda çalışan sade bir metronom. Tek dosya, kurulum gerektirmez: `inde
 - Tempo: 30–250 vuruş/dakika (kaydırıcı veya − / + düğmeleri)
 - Ölçüler: 2/4, 3/4, 4/4, 5/4, 6/8, 7/8, 9/8, 12/8
 - Ölçü başında zil: açıkken her ölçünün ilk vuruşu daha tiz tıklar, kapalıyken tüm vuruşlar aynıdır
-- Türkçe ve İngilizce arayüz (bayrakla seçilir, varsayılan Türkçe)
+- Türkçe ve İngilizce arayüz: sağ üstteki "Language" menüsünden bayrakla seçilir, varsayılan Türkçe
 - Ses seviyesi ayarı
 - Üç tık sesi: Klave (varsayılan), Yumuşak, Tahta. Hoparlörüne en uygun olanı seç; seçim her cihazda ayrı hatırlanır
 - Telefonda dik ekrana tam sığar; iPhone sessiz modda da çalar
