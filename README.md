@@ -8,6 +8,8 @@
 - Ölçüler: 2/4, 3/4, 4/4, 5/4, 6/8, 7/8, 9/8, 12/8
 - Ölçü başında zil: açıkken her ölçünün ilk vuruşu daha tiz tıklar, kapalıyken tüm vuruşlar aynıdır
 - Türkçe ve İngilizce arayüz: sağ üstteki "Language" menüsünden bayrakla seçilir, varsayılan Türkçe
+- Tempo rakamına dokununca yazarak girme (telefonda rakam klavyesi açılır)
+- Ritimle dokunarak tempo: boş bir yere art arda dokun ya da T tuşuna bas
 - Ses seviyesi ayarı
 - Üç tık sesi: Klave (varsayılan), Yumuşak, Tahta. Hoparlörüne en uygun olanı seç; seçim her cihazda ayrı hatırlanır
 - Telefonda dik ekrana tam sığar; iPhone sessiz modda da çalar

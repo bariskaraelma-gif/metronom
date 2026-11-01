@@ -110,6 +110,18 @@
   .bpm { font-family: var(--font-mono); font-size: 72px; line-height: 1; font-variant-numeric: tabular-nums; }
   .bpm-label { color: var(--muted); font-size: 13px; letter-spacing: .1em; text-transform: uppercase; margin-top: 6px; }
   .tempo-name { color: var(--muted); font-size: 14px; margin-top: 2px; font-style: italic; }
+  .bpm-view {
+    border: 0; background: none; color: inherit; padding: 0 6px; cursor: text;
+    border-bottom: 2px dashed transparent; border-radius: 0;
+  }
+  .bpm-view:hover { border-bottom-color: var(--line); }
+  .bpm-view.tapped { color: var(--brass); }
+  .bpm-input {
+    width: 3.4ch; padding: 0 6px; text-align: center; color: var(--ink); background: none;
+    border: 0; border-bottom: 2px solid var(--beat); border-radius: 0; outline: none;
+  }
+  .tap-tip { color: var(--muted); font-size: 12px; margin-top: 6px; min-height: 1.3em; }
+  .tap-tip.active { color: var(--brass); font-weight: 500; }
 
   .bpm-row { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
   .round {
@@ -173,6 +185,8 @@
   }
   @media (max-width: 520px) and (max-height: 700px) {
     .bell-toggle span small, .tempo-name { display: none; }
+    .bpm-label { margin-top: 2px; }
+    .tap-tip { margin-top: 2px; font-size: 11px; }
     .dot { width: 18px; height: 18px; }
   }
   @media (max-width: 520px) and (max-height: 600px) {
@@ -225,9 +239,12 @@
   <div class="beats" id="beats" aria-hidden="true"></div>
 
   <div class="tempo">
-    <div class="bpm" id="bpmView">100</div>
+    <button class="bpm bpm-view" id="bpmView" data-i18n-aria="editBpm" aria-label="Tempoyu yaz">100</button>
+    <input class="bpm bpm-input" id="bpmInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3"
+           enterkeyhint="done" autocomplete="off" data-i18n-aria="editBpm" aria-label="Tempoyu yaz" hidden>
     <div class="bpm-label" data-i18n="bpmLabel">vuruş / dakika</div>
     <div class="tempo-name" id="tempoName">Moderato</div>
+    <div class="tap-tip" id="tapTip" data-i18n="tapTip" aria-live="polite">Hızı belirlemek için boş bir yere ritimle dokun</div>
   </div>
 
   <div class="bpm-row">
@@ -270,7 +287,7 @@
   </label>
 
   <button class="start" id="start">Başlat</button>
-  <p class="hint" data-i18n="hint">Boşluk: başlat/durdur · ↑↓ tempo ±1 · Shift+↑↓ ±10</p>
+  <p class="hint" data-i18n="hint">Boşluk: başlat/durdur · ↑↓ tempo ±1 · Shift+↑↓ ±10 · T: ritimle vur</p>
 </main>
 
 <script>
@@ -453,15 +470,17 @@
       bpmLabel: "vuruş / dakika", meter: "Ölçü", volume: "Ses", sound: "Tık sesi",
       tahta: "Tahta", klave: "Klave", yumusak: "Yumuşak",
       bell: "Ölçü başında zil", bellNote: "Açıkken ilk vuruş daha tiz tıklar; kapalıyken tüm vuruşlar aynı",
-      start: "Başlat", stop: "Durdur", hint: "Boşluk: başlat/durdur · ↑↓ tempo ±1 · Shift+↑↓ ±10",
-      minus: "Tempoyu 1 azalt", plus: "Tempoyu 1 artır"
+      start: "Başlat", stop: "Durdur", hint: "Boşluk: başlat/durdur · ↑↓ tempo ±1 · Shift+↑↓ ±10 · T: ritimle vur",
+      minus: "Tempoyu 1 azalt", plus: "Tempoyu 1 artır", editBpm: "Tempoyu yaz",
+      tapTip: "Hızı belirlemek için boş bir yere ritimle dokun", tapCount: "{n}. dokunuş"
     },
     en: {
       bpmLabel: "beats / minute", meter: "Time signature", volume: "Volume", sound: "Click sound",
       tahta: "Woodblock", klave: "Clave", yumusak: "Soft",
       bell: "Accent on beat one", bellNote: "On: the first beat clicks higher; off: all beats sound the same",
-      start: "Start", stop: "Stop", hint: "Space: start/stop · ↑↓ tempo ±1 · Shift+↑↓ ±10",
-      minus: "Decrease tempo by 1", plus: "Increase tempo by 1"
+      start: "Start", stop: "Stop", hint: "Space: start/stop · ↑↓ tempo ±1 · Shift+↑↓ ±10 · T: tap tempo",
+      minus: "Decrease tempo by 1", plus: "Increase tempo by 1", editBpm: "Type the tempo",
+      tapTip: "Tap an empty spot in rhythm to set the tempo", tapCount: "Tap {n}"
     }
   };
   const t = key => texts[state.lang][key];
@@ -519,8 +538,58 @@
   const setBell = on => { state.bell = on; $("beats").classList.toggle("accent", on); save(); };
   $("bell").addEventListener("change", e => setBell(e.target.checked));
   $("start").onclick = () => state.running ? stop() : start();
+  // Tempo rakamına tıklayınca yazarak girme (telefonda rakam klavyesi açılır)
+  function editBpm() {
+    $("bpmInput").value = state.bpm;
+    $("bpmView").hidden = true; $("bpmInput").hidden = false;
+    $("bpmInput").focus(); $("bpmInput").select();
+  }
+  function closeBpmEdit(commit) {
+    if ($("bpmInput").hidden) return;
+    const v = parseInt($("bpmInput").value, 10);
+    if (commit && v > 0) setBpm(v);
+    $("bpmInput").hidden = true; $("bpmView").hidden = false;
+  }
+  $("bpmView").addEventListener("click", editBpm);
+  $("bpmInput").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 3); });
+  $("bpmInput").addEventListener("keydown", e => {
+    e.stopPropagation();
+    if (e.key === "Enter") { e.preventDefault(); closeBpmEdit(true); $("bpmView").focus(); }
+    else if (e.key === "Escape") { closeBpmEdit(false); $("bpmView").focus(); }
+  });
+  $("bpmInput").addEventListener("blur", () => closeBpmEdit(true));
+
+  // Ritimle dokunarak tempo: boş bir yere (ya da T tuşuna) art arda vurulunca aralıkların ortalaması alınır
+  let taps = [], tapResetTimer = null;
+  function tap() {
+    const now = performance.now();
+    if (taps.length && now - taps[taps.length - 1] > 2000) taps = [];
+    taps.push(now);
+    if (taps.length > 8) taps.shift();
+    if (taps.length >= 2) {
+      const avg = (taps[taps.length - 1] - taps[0]) / (taps.length - 1);
+      setBpm(60000 / avg);
+    }
+    $("tapTip").textContent = t("tapCount").replace("{n}", taps.length);
+    $("tapTip").classList.add("active");
+    $("bpmView").classList.add("tapped");
+    clearTimeout(tapResetTimer);
+    tapResetTimer = setTimeout(() => {
+      taps = [];
+      $("tapTip").textContent = t("tapTip"); $("tapTip").classList.remove("active");
+      $("bpmView").classList.remove("tapped");
+    }, 2000);
+  }
+  document.addEventListener("pointerdown", e => {
+    if (e.button > 0) return;
+    if (e.target.closest("button, input, label, select, a, .lang, .bell-toggle")) return;
+    if (!$("bpmInput").hidden) return;
+    tap();
+  });
+
   document.addEventListener("keydown", e => {
     if (e.target.matches("input[type=range]") && e.key.startsWith("Arrow")) return;
+    if ((e.key === "t" || e.key === "T") && !e.ctrlKey && !e.metaKey && !e.altKey) { tap(); return; }
     if (e.code === "Space") { e.preventDefault(); state.running ? stop() : start(); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setBpm(state.bpm + (e.shiftKey ? 10 : 1)); }
     else if (e.key === "ArrowDown") { e.preventDefault(); setBpm(state.bpm - (e.shiftKey ? 10 : 1)); }
