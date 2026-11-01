@@ -7,6 +7,7 @@ Tarayıcıda çalışan sade bir metronom. Tek dosya, kurulum gerektirmez: `inde
 - Tempo: 30–250 vuruş/dakika (kaydırıcı veya − / + düğmeleri)
 - Ölçüler: 2/4, 3/4, 4/4, 5/4, 6/8, 7/8, 9/8, 12/8
 - Ölçü başında zil: açıkken her ölçünün ilk vuruşu daha tiz tıklar, kapalıyken tüm vuruşlar aynıdır
+- Ses seviyesi ayarı
 - Ayarlar tarayıcıda hatırlanır
 
 ## Klavye

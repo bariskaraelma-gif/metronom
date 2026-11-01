@@ -130,6 +130,11 @@
     </div>
   </div>
 
+  <div>
+    <div class="section-label"><label for="volume">Ses</label></div>
+    <input type="range" id="volume" min="0" max="100" value="90">
+  </div>
+
   <label class="bell-toggle" for="bell">
     <span>Ölçü başında zil<small>Açıkken ilk vuruş daha tiz tıklar; kapalıyken tüm vuruşlar aynı</small></span>
     <span class="switch"><input type="checkbox" id="bell" checked><span class="track"></span></span>
@@ -142,26 +147,48 @@
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  const state = { bpm: 100, beats: 4, bell: true, running: false };
+  const state = { bpm: 100, beats: 4, bell: true, volume: 90, running: false };
 
   try {
     const saved = JSON.parse(localStorage.getItem("metronom") || "{}");
     Object.assign(state, saved, { running: false });
   } catch (e) {}
-  const save = () => { try { localStorage.setItem("metronom", JSON.stringify({ bpm: state.bpm, beats: state.beats, bell: state.bell })); } catch (e) {} };
+  const save = () => { try { localStorage.setItem("metronom", JSON.stringify({ bpm: state.bpm, beats: state.beats, bell: state.bell, volume: state.volume })); } catch (e) {} };
 
-  let ctx = null, nextTime = 0, beatIndex = 0, timer = null;
+  let ctx = null, master = null, noise = null, nextTime = 0, beatIndex = 0, timer = null;
   const LOOKAHEAD = 0.1; // saniye
 
+  function setupAudio() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.connect(ctx.destination);
+    applyVolume();
+    // Tıkın "tahta" vuruş hissi için kısa beyaz gürültü
+    noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.03), ctx.sampleRate);
+    const d = noise.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const applyVolume = () => { if (master) master.gain.value = state.volume / 100; };
+
+  // Tahta blok benzeri tık: inen perdeli ton + filtrelenmiş gürültü vuruşu
   function click(t, strong) {
+    const f = strong ? 1800 : 1100;
     const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = "square";
-    o.frequency.value = strong ? 1600 : 1000;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(strong ? 0.35 : 0.25, t + 0.001);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
-    o.connect(g).connect(ctx.destination);
-    o.start(t); o.stop(t + 0.05);
+    o.type = "triangle";
+    o.frequency.setValueAtTime(f, t);
+    o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.05);
+    g.gain.setValueAtTime(0.85, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+    o.connect(g).connect(master);
+    o.start(t); o.stop(t + 0.08);
+
+    const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain();
+    n.buffer = noise;
+    bp.type = "bandpass"; bp.frequency.value = f * 1.5; bp.Q.value = 1.5;
+    ng.gain.setValueAtTime(0.5, t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+    n.connect(bp).connect(ng).connect(master);
+    n.start(t);
   }
 
   function schedule() {
@@ -182,7 +209,7 @@
   }
 
   function start() {
-    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!ctx) setupAudio();
     ctx.resume();
     state.running = true; beatIndex = 0; nextTime = ctx.currentTime + 0.05;
     schedule(); timer = setInterval(schedule, 25);
@@ -223,6 +250,8 @@
     else if (e.key === "ArrowDown") { e.preventDefault(); setBpm(state.bpm - (e.shiftKey ? 10 : 1)); }
   });
 
+  $("volume").addEventListener("input", e => { state.volume = +e.target.value; applyVolume(); save(); });
+  $("volume").value = state.volume;
   $("bell").checked = state.bell;
   setBell(state.bell);
   setBpm(state.bpm);
