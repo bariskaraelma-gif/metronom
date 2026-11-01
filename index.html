@@ -79,6 +79,7 @@
   h1 { margin: 0; font-size: 15px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 
   .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  [hidden] { display: none !important; }
   .lang { position: relative; display: flex; align-items: center; gap: 6px; }
   .lang-label { font-size: 12px; letter-spacing: .06em; color: var(--muted); }
   .lang button {
@@ -193,7 +194,7 @@
 
 <main class="device">
   <div class="top">
-    <h1>Karaelma Metronom</h1>
+    <h1>Metronom</h1>
     <div class="lang">
       <span class="lang-label" id="langLabel">Language:</span>
       <button class="lang-current" id="langBtn" aria-haspopup="true" aria-expanded="false" aria-labelledby="langLabel langBtn"></button>
