@@ -229,23 +229,23 @@
     ({ tahta, klave, yumusak })[state.sound](t, strong);
   }
 
-  // Tahta blok benzeri tık: inen perdeli ton + filtrelenmiş gürültü vuruşu
+  // Tahta blok: Klave'den daha pes ve uzun çınlayan, perdesi kaymayan kısmiler + vuruş gürültüsü
   function tahta(t, strong) {
-    const f = strong ? 1800 : 1100;
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = "triangle";
-    o.frequency.setValueAtTime(f, t);
-    o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.05);
-    g.gain.setValueAtTime(0.85, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
-    o.connect(g).connect(master);
-    o.start(t); o.stop(t + 0.08);
-
+    const f = strong ? 900 : 650;
+    for (const [ratio, amp, dur] of [[1, 0.55, 0.08], [2.1, 0.22, 0.035], [3.6, 0.1, 0.018]]) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = f * ratio;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(amp, t + 0.001);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g).connect(master);
+      o.start(t); o.stop(t + dur + 0.01);
+    }
     const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain();
     n.buffer = noise;
-    bp.type = "bandpass"; bp.frequency.value = f * 1.5; bp.Q.value = 1.5;
-    ng.gain.setValueAtTime(0.5, t);
-    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+    bp.type = "bandpass"; bp.frequency.value = 2500; bp.Q.value = 0.8;
+    ng.gain.setValueAtTime(0.35, t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.006);
     n.connect(bp).connect(ng).connect(master);
     n.start(t);
   }
