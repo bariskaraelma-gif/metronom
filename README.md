@@ -11,6 +11,7 @@
 - Ses seviyesi ayarı
 - Üç tık sesi: Klave (varsayılan), Yumuşak, Tahta. Hoparlörüne en uygun olanı seç; seçim her cihazda ayrı hatırlanır
 - Telefonda dik ekrana tam sığar; iPhone sessiz modda da çalar
+- Apple Watch, kilit ekranı ve medya tuşlarından başlat/durdur; ileri/geri tuşları tempoyu ±5 değiştirir
 - Ayarlar tarayıcıda hatırlanır
 
 ## Klavye

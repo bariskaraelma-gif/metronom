@@ -385,18 +385,52 @@
     new Uint8Array(buf, 44).fill(128);
     return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
   }
+  // Sessiz <audio> aynı zamanda sayfayı bir "medya oynatıcı" yapar: kilit ekranı, Apple Watch
+  // "Şimdi Çalıyor" ve klavye medya tuşları onu görür ve oynat/duraklat gönderir.
   function unlockAudio() {
     try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
     if (!ctx) setupAudio();
-    if (!navigator.audioSession && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      if (!silentAudio) {
-        silentAudio = new Audio(silentWavUrl());
-        silentAudio.loop = true;
-        silentAudio.setAttribute("playsinline", "");
-      }
-      silentAudio.play().catch(() => {});
+    if (!silentAudio) {
+      silentAudio = new Audio(silentWavUrl());
+      silentAudio.loop = true;
+      silentAudio.setAttribute("playsinline", "");
     }
+    silentAudio.play().catch(() => {});
     if (ctx.state !== "running") ctx.resume();
+  }
+
+  // Apple Watch / kilit ekranı kontrolleri
+  let artwork = null;
+  function artworkUrl() {
+    if (artwork) return artwork;
+    const c = document.createElement("canvas"); c.width = c.height = 256;
+    const g = c.getContext("2d");
+    g.fillStyle = "#3a4d7a"; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = "#ffffff";
+    g.beginPath(); g.moveTo(88, 210); g.lineTo(168, 210); g.lineTo(144, 52); g.lineTo(112, 52); g.closePath(); g.fill();
+    g.strokeStyle = "#e2b04a"; g.lineWidth = 12; g.lineCap = "round";
+    g.beginPath(); g.moveTo(128, 186); g.lineTo(168, 78); g.stroke();
+    return (artwork = c.toDataURL("image/png"));
+  }
+  function updateMedia() {
+    if (!("mediaSession" in navigator)) return;
+    try {
+      const meter = $("meters").querySelector(`[data-beats="${state.beats}"]`).textContent;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: "Metronom", artist: `${state.bpm} BPM · ${meter}`, album: "Karaelma Metronom",
+        artwork: [{ src: artworkUrl(), sizes: "256x256", type: "image/png" }]
+      });
+      navigator.mediaSession.playbackState = state.running ? "playing" : "paused";
+    } catch (e) {}
+  }
+  if ("mediaSession" in navigator) {
+    const on = (action, fn) => { try { navigator.mediaSession.setActionHandler(action, fn); } catch (e) {} };
+    on("play", () => { if (!state.running) start(); });
+    on("pause", () => { if (state.running) stop(); });
+    on("stop", () => { if (state.running) stop(); });
+    // Saat/kulaklıktaki ileri-geri tuşları tempoyu 5 değiştirir
+    on("nexttrack", () => setBpm(state.bpm + 5));
+    on("previoustrack", () => setBpm(state.bpm - 5));
   }
 
   function start() {
@@ -404,12 +438,14 @@
     state.running = true; beatIndex = 0; nextTime = ctx.currentTime + 0.05;
     schedule(); timer = setInterval(schedule, 25);
     $("start").textContent = t("stop"); $("start").classList.add("running");
+    updateMedia();
   }
   function stop() {
     state.running = false; clearInterval(timer);
     if (silentAudio) silentAudio.pause();
     for (const d of $("beats").children) d.classList.remove("on");
     $("start").textContent = t("start"); $("start").classList.remove("running");
+    updateMedia();
   }
 
   const texts = {
@@ -464,6 +500,7 @@
     state.bpm = Math.min(250, Math.max(30, Math.round(v)));
     $("bpm").value = state.bpm; $("bpmView").textContent = state.bpm;
     $("tempoName").textContent = names.find(([max]) => state.bpm < max)[1];
+    if (silentAudio) updateMedia();
     save();
   }
   function setBeats(n) {
@@ -471,6 +508,7 @@
     if (beatIndex >= n) beatIndex = 0;
     $("beats").innerHTML = Array.from({ length: n }, (_, i) => `<div class="dot${i === 0 ? " first" : ""}"></div>`).join("");
     for (const b of $("meters").children) b.setAttribute("aria-pressed", String(+b.dataset.beats === n));
+    if (silentAudio) updateMedia();
     save();
   }
 
