@@ -21,3 +21,12 @@
 - Boşluk: başlat / durdur
 - ↑ / ↓: tempo ±1
 - Shift + ↑ / ↓: tempo ±10
+
+## Akort aleti (`akort.html`)
+
+Metronomun üst menüsündeki "Akort" sekmesinden açılır. Mikrofonla çalışır; ses tarayıcıdan dışarı çıkmaz.
+
+- **Sade mod** (kromatik, gitar, bas, keman, viyola, viyolonsel, kontrbas, ukulele): ibre, nota adı (Do4 / C4), frekans ve cent sapması. Tellere dokununca referans ses çalar.
+- **Türk müziği çalgıları** (kanun, ud, tanbur, kemençe, ney, bağlama): batı nota adının yanında Arel-Ezgi-Uzdilek perde adı ve yazılışı görünür. Bolahenk'te 440 Hz → "Neva – Re". Ahenk seçilebilir; ibre perdeye (koma) ya da 12 eşit düzene göre ayarlanabilir.
+- **Piyano modu**: seçili kısminin (1.–6.) yakınlaştırılmış spektrumu. 2 ve 3 telli tuşlarda her telin tepesi ayrı işaretlenir, teller arası fark (Hz, cent) ve zarftan ölçülen vuru gösterilir. 88 tuşlu klavyede tek/2/3 telli bölgeler, akort haritası ve tipik gerilme eğrisi. Tel bölge sınırları ayarlanabilir.
+- La (A4) referansı 400–480 Hz arası ayarlanabilir.

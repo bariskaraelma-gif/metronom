@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef0f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12151c" media="(prefers-color-scheme: dark)">
+<title>Karaelma Akort</title>
+<meta name="description" content="Karaelma Akort: tarayıcıda çalışan ücretsiz akort aleti. Gitar, keman ve diğer çalgılar için sade ibre; kanun, ud, tanbur için geleneksel perde adları ve ahenk; piyano için 2 ve 3 telli tuşlarda her telin tepesini ayrı gösteren spektrum ve vuru ölçer.">
+<link rel="canonical" href="https://bariskaraelma-gif.github.io/metronom/akort.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Karaelma Akort">
+<meta property="og:description" content="Ücretsiz online akort aleti: Türk müziği perde adları ve piyano için tel tel spektrum.">
+<meta property="og:url" content="https://bariskaraelma-gif.github.io/metronom/akort.html">
+<meta property="og:locale" content="tr_TR">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  /* Metronom ile aynı görsel dil; piyano modunda panel genişler */
+  :root {
+    --bg: #eef0f3; --panel: #ffffff; --ink: #1b2230; --muted: #657085; --line: #d8dce4;
+    --brass: #b8860b; --brass-soft: #f5e7c4; --beat: #3a4d7a; --beat-off: #dfe3ea;
+    --good: #23854f; --warn: #c27c0e; --bad: #c0392b; --s1: #9aa3b2;
+    --wkey: #fbfbf8; --bkey: #1d2129;
+    --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151c; --panel: #1b2029; --ink: #e8ebf1; --muted: #8d97aa; --line: #2c3340;
+      --brass: #e2b04a; --brass-soft: #3a3020; --beat: #8fa6dc; --beat-off: #2a313e;
+      --good: #5cc98a; --warn: #e5a940; --bad: #ec6f61; --s1: #6b7486;
+      --wkey: #d5dae2; --bkey: #0c0e13; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151c; --panel: #1b2029; --ink: #e8ebf1; --muted: #8d97aa; --line: #2c3340;
+    --brass: #e2b04a; --brass-soft: #3a3020; --beat: #8fa6dc; --beat-off: #2a313e;
+    --good: #5cc98a; --warn: #e5a940; --bad: #ec6f61; --s1: #6b7486;
+    --wkey: #d5dae2; --bkey: #0c0e13; color-scheme: dark;
+  }
+  html { box-sizing: border-box; background: var(--bg); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--font-display);
+    -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%;
+    display: grid; place-items: start center; padding-block: 24px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  [hidden] { display: none !important; }
+  .device {
+    width: 100%; max-width: 440px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 20px;
+  }
+  body.piano .device { max-width: 1040px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 16px; align-items: baseline; }
+  .tabs h1, .tabs a { margin: 0; font-size: 15px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
+  .tabs h1 { color: var(--ink); border-bottom: 2px solid var(--brass); padding-bottom: 2px; }
+  .tabs a { color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; padding-bottom: 2px; }
+  .tabs a:hover { border-bottom-color: var(--line); }
+  .section-label { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+  .row > div { flex: 1 1 150px; }
+  #turkOpts > div { flex: 1 1 100%; }
+  select, input[type=number] {
+    width: 100%; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink); font: 500 15px var(--font-display);
+  }
+  input[type=number] { font-family: var(--font-mono); }
+  .seg { display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg button, .btn {
+    padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel);
+    color: var(--ink); font: 500 14px var(--font-display); cursor: pointer;
+  }
+  .seg button { font-family: var(--font-mono); min-width: 44px; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+  .seg button:disabled { opacity: .35; cursor: default; }
+  .btn:active, .seg button:active { background: var(--beat-off); }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+  button { touch-action: manipulation; }
+  .start {
+    padding: 14px; border-radius: 14px; border: none; background: var(--beat); color: var(--panel);
+    font: 700 17px var(--font-display); cursor: pointer; letter-spacing: .02em; flex: 1;
+  }
+  .start.running { background: var(--ink); }
+  .mic-row { display: flex; gap: 12px; align-items: center; }
+  .level { width: 70px; height: 8px; border-radius: 4px; background: var(--beat-off); overflow: hidden; flex: none; }
+  .level i { display: block; height: 100%; width: 0; background: var(--good); transition: width .08s; }
+  .msg { color: var(--bad); font-size: 14px; margin: 0; }
+  .note-small { color: var(--muted); font-size: 13px; margin: 0; line-height: 1.45; }
+
+  /* Sade mod */
+  .gauge { width: 100%; max-width: 360px; display: block; margin: 0 auto; }
+  .gauge .tick { stroke: var(--muted); stroke-width: 1; }
+  .gauge .tick.major { stroke: var(--ink); stroke-width: 1.6; }
+  .gauge .zone { fill: none; stroke: var(--good); stroke-width: 8; opacity: .35; }
+  .gauge .arc { fill: none; stroke: var(--line); stroke-width: 8; }
+  .gauge text { fill: var(--muted); font: 500 8px var(--font-mono); text-anchor: middle; }
+  #needle { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; transition: transform .12s ease-out; transform-origin: 100px 104px; }
+  .gauge .hub { fill: var(--ink); }
+  .readout { text-align: center; margin-top: -6px; }
+  .big-note { font: 700 64px/1 var(--font-display); }
+  .big-note.ok { color: var(--good); }
+  .stale { opacity: .45; }
+  .sub { font: 500 15px var(--font-mono); color: var(--muted); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .cents { font: 500 22px var(--font-mono); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .perde {
+    display: inline-block; margin-top: 10px; padding: 6px 14px; border-radius: 999px;
+    background: var(--brass-soft); font-size: 20px; font-weight: 700;
+  }
+  .perde small { font: 500 13px var(--font-mono); color: var(--muted); margin-left: 6px; }
+  .strings { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .strings button { min-width: 54px; padding: 8px 6px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 500 14px var(--font-mono); cursor: pointer; }
+  .strings button small { display: block; color: var(--muted); font-size: 11px; }
+  .strings button.near { border-color: var(--brass); box-shadow: inset 0 0 0 1px var(--brass); }
+
+  /* Piyano modu */
+  .pv-head { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+  .pv-note { font: 700 44px/1 var(--font-display); }
+  .pv-note small { display: block; font: 500 14px var(--font-mono); color: var(--muted); margin-top: 6px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font: 500 13px var(--font-display); color: var(--panel); }
+  .pv-ctrls { display: flex; gap: 18px; flex-wrap: wrap; }
+  canvas { display: block; width: 100%; }
+  #spec { height: 280px; border: 1px solid var(--line); border-radius: 12px; }
+  #envC { height: 90px; border: 1px solid var(--line); border-radius: 12px; }
+  .bar { height: 6px; border-radius: 3px; background: var(--beat-off); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--beat); }
+  .peaks { display: grid; gap: 4px; font: 500 14px var(--font-mono); font-variant-numeric: tabular-nums; }
+  .peaks .p { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .peaks .sw { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .beat-big { font: 700 20px var(--font-mono); }
+  .kbwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .kbinner { min-width: 760px; display: flex; flex-direction: column; gap: 8px; }
+  #kb { height: 120px; cursor: pointer; }
+  #map { height: 170px; border: 1px solid var(--line); border-radius: 12px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); align-items: center; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+
+  details { border-top: 1px solid var(--line); padding-top: 10px; }
+  details summary { cursor: pointer; font-weight: 700; font-size: 15px; }
+  details p, details li { font-size: 14px; line-height: 1.55; color: var(--ink); }
+  details p { margin: 8px 0; }
+  .help h2 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 500; }
+
+  @media (max-width: 520px) {
+    body { padding: 0; display: block; }
+    .device, body.piano .device {
+      max-width: none; min-height: 100vh; border: 0; border-radius: 0; padding-block: 16px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+    .big-note { font-size: 56px; }
+    #spec { height: 230px; }
+  }
+  @media (prefers-reduced-motion: reduce) { #needle, .level i { transition: none; } }
+</style>
+</head>
+<body>
+
+<main class="device">
+  <div class="top">
+    <nav class="tabs" aria-label="Araçlar">
+      <a href="./">Metronom</a>
+      <h1>Akort</h1>
+    </nav>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="section-label"><label for="instr">Çalgı</label></div>
+      <select id="instr">
+        <optgroup label="Genel">
+          <option value="chromatic">Kromatik (her çalgı)</option>
+        </optgroup>
+        <optgroup label="Batı çalgıları">
+          <option value="guitar">Gitar</option>
+          <option value="bass">Bas gitar</option>
+          <option value="violin">Keman</option>
+          <option value="viola">Viyola</option>
+          <option value="cello">Viyolonsel</option>
+          <option value="contrabass">Kontrbas</option>
+          <option value="ukulele">Ukulele</option>
+        </optgroup>
+        <optgroup label="Türk müziği çalgıları">
+          <option value="kanun">Kanun</option>
+          <option value="ud">Ud</option>
+          <option value="tanbur">Tanbur</option>
+          <option value="kemence">Klasik kemençe</option>
+          <option value="ney">Ney</option>
+          <option value="baglama">Bağlama</option>
+          <option value="turk">Diğer (perde adlarıyla)</option>
+        </optgroup>
+        <optgroup label="Piyano">
+          <option value="piano">Piyano (tel tel analiz)</option>
+        </optgroup>
+      </select>
+    </div>
+    <div style="flex: 0 1 130px">
+      <div class="section-label"><label for="ref">La (A4) Hz</label></div>
+      <input type="number" id="ref" min="400" max="480" step="0.5" value="440" inputmode="decimal">
+    </div>
+  </div>
+
+  <div class="row" id="turkOpts" hidden>
+    <div>
+      <div class="section-label"><label for="ahenk">Ahenk</label></div>
+      <select id="ahenk"></select>
+    </div>
+    <div>
+      <div class="section-label">İbre neye göre</div>
+      <div class="seg" id="needleMode">
+        <button data-v="perde">Perde (koma)</button>
+        <button data-v="bati">Batı (12 eşit)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mic-row">
+    <button class="start" id="micBtn">Mikrofonu aç</button>
+    <div class="level" title="Giriş seviyesi"><i id="levelBar"></i></div>
+  </div>
+  <p class="msg" id="msg" hidden></p>
+
+  <!-- Sade mod -->
+  <section id="simpleView">
+    <svg class="gauge" viewBox="0 0 200 118" aria-hidden="true">
+      <g id="ticks"></g>
+      <line id="needle" x1="100" y1="104" x2="100" y2="24"/>
+      <circle class="hub" cx="100" cy="104" r="5"/>
+    </svg>
+    <div class="readout" aria-live="polite">
+      <div class="big-note" id="sNote">—</div>
+      <div class="cents" id="sCents">&nbsp;</div>
+      <div class="sub" id="sHz">Çalgınızı çalın</div>
+      <div class="perde" id="sPerde" hidden></div>
+    </div>
+    <div class="strings" id="strings" style="margin-top:16px"></div>
+    <p class="note-small" id="stringsHint" style="text-align:center;margin-top:8px" hidden>Bir tele dokunursanız o notanın referans sesi çalar.</p>
+  </section>
+
+  <!-- Piyano modu -->
+  <section id="pianoView" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="pv-head">
+      <div class="pv-note" id="pNote">—<small>Bir tuşa basın ya da aşağıdaki klavyeden seçin</small></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span class="badge" id="pBadge" hidden></span>
+        <button class="btn" id="lockBtn" title="Klavyede ← → ile nota değiştirilir">Otomatik nota</button>
+        <button class="btn" id="freezeBtn">Dondur</button>
+      </div>
+    </div>
+
+    <div class="pv-ctrls">
+      <div>
+        <div class="section-label">Kısmi (partial)</div>
+        <div class="seg" id="partialSeg"></div>
+      </div>
+      <div>
+        <div class="section-label">Pencere süresi</div>
+        <div class="seg" id="winSeg"><button data-v="2">2 s</button><button data-v="4">4 s</button><button data-v="6">6 s</button></div>
+      </div>
+      <div>
+        <div class="section-label">Görünen aralık</div>
+        <div class="seg" id="spanSeg"><button data-v="10">±10 c</button><button data-v="25">±25 c</button><button data-v="50">±50 c</button></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="bar"><i id="winBar"></i></div>
+      <p class="note-small" id="winText" style="margin-top:6px">&nbsp;</p>
+    </div>
+
+    <canvas id="spec" aria-label="Seçili kısminin yakınlaştırılmış spektrumu"></canvas>
+
+    <div class="two">
+      <div>
+        <div class="section-label">Tepeler (frekans sırasıyla)</div>
+        <div class="peaks" id="peakList"><span class="note-small">Henüz ölçüm yok.</span></div>
+      </div>
+      <div>
+        <div class="section-label">Vuru (beat)</div>
+        <div class="beat-big" id="beatText">—</div>
+        <p class="note-small" id="beatNote">Teller birbirine akortlandıkça vuru yavaşlar; hedef 0.</p>
+        <canvas id="envC" aria-label="Ses zarfı" style="margin-top:8px"></canvas>
+      </div>
+    </div>
+
+    <div class="kbwrap">
+      <div class="kbinner">
+        <canvas id="kb" aria-label="88 tuşlu klavye: tıklayarak nota seçin"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--s1)"></i>Tek telli</span>
+          <span><i style="background:var(--beat)"></i>2 telli</span>
+          <span><i style="background:var(--brass)"></i>3 telli</span>
+          <span>· Tuş üstündeki nokta = teller arası en büyük fark: <b style="color:var(--good)">● &lt;1 c</b> <b style="color:var(--warn)">● &lt;3 c</b> <b style="color:var(--bad)">● ≥3 c</b></span>
+        </div>
+        <div class="section-label" style="margin:6px 0 0">Akort haritası (seçili kısmide ölçülen sapma, cent)</div>
+        <canvas id="map" aria-label="Akort haritası"></canvas>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="section-label">Piyano tipi</div>
+        <div class="seg" id="pianoType"><button data-v="grand">Kuyruklu</button><button data-v="upright">Duvar (dik)</button></div>
+      </div>
+      <div>
+        <div class="section-label"><label for="s2">2 tel başlangıcı</label></div>
+        <select id="s2"></select>
+      </div>
+      <div>
+        <div class="section-label"><label for="s3">3 tel başlangıcı</label></div>
+        <select id="s3"></select>
+      </div>
+      <div style="flex:0 0 auto"><button class="btn" id="clearMap">Haritayı temizle</button></div>
+    </div>
+  </section>
+
+  <section class="help">
+    <h2>Bilgi</h2>
+    <details>
+      <summary>Cent, koma ve 440 Hz</summary>
+      <p>Bir oktav 1200 centtir; eşit düzende (12-ES) iki komşu yarım ses arası 100 cent. Kulak, yan yana çalınan iki seste yaklaşık 3–5 centlik farkı fark eder.</p>
+      <p>Türk müziğinde Arel-Ezgi-Uzdilek sistemi oktavı 53 komaya böler; 1 koma ≈ 22,6 cent. Perde konumları bu sisteme göre gösterilir; icrada bazı perdeler (örneğin Segâh, Eviç) makama göre biraz farklı basılabilir.</p>
+      <p>La (A4) referansı genelde 440 Hz'dir; bazı orkestralar 442–443 Hz, barok müzik 415 Hz kullanır.</p>
+    </details>
+    <details>
+      <summary>Ahenk ve yazılış (Neva – Re)</summary>
+      <p>Türk müziği notası, çalgının gerçekte çıkardığı sesten farklı yazılır. Bolahenk ahenginde yazılı Re (Neva perdesi) 440 Hz La sesini verir; bu yüzden kanunun 440 Hz teli "Neva – Re" olarak görünür.</p>
+      <p>Ahenk değiştikçe aynı perde başka bir frekansta çalar. Ahenk adının yanındaki nota, Rast perdesinin hangi sesi verdiğini gösterir (Bolahenk'te Rast = Re).</p>
+      <p>Yazılıştaki ♭¹, ♯⁴, ♯⁵ işaretleri notanın kaç koma pesleştiğini ya da tizleştiğini gösterir: Segâh = Si♭¹ (1 koma pes), Hicaz = Do♯⁵.</p>
+    </details>
+    <details>
+      <summary>Piyanoda neden 2 ve 3 tel? Vuru nedir?</summary>
+      <p>Piyanonun bas bölgesinde her tuşa bir, ortasında iki, orta ve tiz bölgede üç tel bağlıdır. Aynı tuşun telleri (unison) birbirine tam akortlu değilse sesleri birbirine karışırken ses şiddeti dalgalanır: buna vuru denir. Saniyedeki vuru sayısı, iki tel arasındaki frekans farkına (Hz) eşittir.</p>
+      <p>Spektrumda her tepe bir teli temsil eder. Teller çok yakınsa (yaklaşık 1/pencere süresi Hz'den yakın) tepeler tek tepeye karışır; o zaman pencereyi uzatın ya da vuru grafiğine bakın.</p>
+      <p>Tepeler frekans sırasıyla numaralanır; hangisinin hangi tel olduğunu bulmak için akortçular gibi diğer telleri keçe ya da kama ile susturup tek teli dinleyin.</p>
+    </details>
+    <details>
+      <summary>Kısmiler, inharmonisite ve gerilmiş oktav</summary>
+      <p>Bir piyano teli yalnızca temel frekansı değil, onun yaklaşık 2, 3, 4… katı olan kısmileri de çıkarır. Teller sert olduğu için bu kısmiler tam katlardan biraz tizdir (inharmonisite). Bu yüzden iyi akort edilmiş bir piyanoda tizler biraz yukarı, baslar biraz aşağı "gerilir"; haritadaki kesikli çizgi bu tipik eğriyi (Railsback eğrisi) yaklaşık olarak gösterir.</p>
+      <p>Daha yüksek bir kısmiye bakmak teller arasındaki farkı Hz olarak büyütür (2. kısmide 2 katı): tepeler daha kolay ayrılır. Basta temel frekans zayıf olduğu için 2.–4. kısmiyle çalışmak daha güvenilirdir.</p>
+    </details>
+    <details>
+      <summary>İyi ölçüm için</summary>
+      <p>Sessiz bir odada çalışın, mikrofonu (telefonu) tellerin yakınına koyun. Tuşa bir kez, orta kuvvetle basıp basılı tutun; pencere dolana kadar (2–6 s) bekleyin. Yeni bir vuruş algılandığında ölçüm baştan başlar.</p>
+      <p>Bilgisayarlarda tarayıcının ses iyileştirmeleri (yankı ve gürültü engelleme) kapatılarak ölçülür; harici bir USB mikrofon daha iyi sonuç verir.</p>
+    </details>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+
+  // ---------- Ayarlar ----------
+  const state = { instr: "chromatic", ref: 440, ahenk: "bolahenk", needle: "perde", partial: 1, win: 4, span: 25, pianoType: "grand", s2: 29, s3: 45 };
+  try { Object.assign(state, JSON.parse(localStorage.getItem("akort") || "{}")); } catch (e) {}
+  const save = () => { try { localStorage.setItem("akort", JSON.stringify(state)); } catch (e) {} };
+  let tuningMap = {};
+  try { tuningMap = JSON.parse(localStorage.getItem("akortHarita") || "{}"); } catch (e) {}
+  const saveMap = () => { try { localStorage.setItem("akortHarita", JSON.stringify(tuningMap)); } catch (e) {} };
+
+  // ---------- Nota ve perde adları ----------
+  const NOTE_TR = ["Do", "Do♯", "Re", "Re♯", "Mi", "Fa", "Fa♯", "Sol", "Sol♯", "La", "La♯", "Si"];
+  const NOTE_EN = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+  const noteTr = m => NOTE_TR[m % 12] + (Math.floor(m / 12) - 1);
+  const noteEn = m => NOTE_EN[m % 12] + (Math.floor(m / 12) - 1);
+  const isBlack = m => [1, 3, 6, 8, 10].includes(m % 12);
+  const f12 = m => state.ref * Math.pow(2, (m - 69) / 12);
+  const fmt = (v, d = 1) => v.toLocaleString("tr-TR", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const sfmt = (v, d = 1) => { const r = +v.toFixed(d); return (r > 0 ? "+" : r < 0 ? "−" : "") + fmt(Math.abs(r), d); };
+
+  // Arel-Ezgi-Uzdilek: Rast'tan itibaren koma konumları (yazılı ses, 53 koma = 1 oktav)
+  const MID = [[0, "Rast"], [4, "Nim Zirgüle"], [5, "Zirgüle"], [8, "Dik Zirgüle"], [9, "Dügâh"], [13, "Kürdi"], [14, "Dik Kürdi"],
+    [17, "Segâh"], [18, "Buselik"], [21, "Dik Buselik"], [22, "Çargâh"], [26, "Nim Hicaz"], [27, "Hicaz"], [30, "Dik Hicaz"],
+    [31, "Neva"], [35, "Nim Hisar"], [36, "Hisar"], [39, "Dik Hisar"], [40, "Hüseyni"], [44, "Acem"], [45, "Dik Acem"],
+    [48, "Eviç"], [49, "Mahur"], [52, "Dik Mahur"]];
+  const MIDN = Object.fromEntries(MID);
+  const LOW = { 22: "Kaba Çargâh", 26: "Kaba Nim Hicaz", 27: "Kaba Hicaz", 30: "Kaba Dik Hicaz", 31: "Yegâh", 35: "Kaba Nim Hisar",
+    36: "Kaba Hisar", 39: "Kaba Dik Hisar", 40: "Hüseyni Aşiran", 44: "Acem Aşiran", 45: "Dik Acem Aşiran", 48: "Irak", 49: "Gevest", 52: "Dik Gevest" };
+  const HIGH = { 0: "Gerdaniye", 4: "Nim Şehnaz", 5: "Şehnaz", 8: "Dik Şehnaz", 9: "Muhayyer", 13: "Sünbüle", 14: "Dik Sünbüle",
+    17: "Tiz Segâh", 18: "Tiz Buselik", 21: "Tiz Dik Buselik" };
+  function perdeName(o, r) {
+    if (o === 0) return MIDN[r];
+    if (o === -1) return LOW[r] || "Kaba " + MIDN[r];
+    if (o === 1) return HIGH[r] || "Tiz " + MIDN[r];
+    return o < 0 ? "Kaba " + perdeName(o + 1, r) : "Tiz " + perdeName(o - 1, r);
+  }
+  // Yazılış: en yakın doğal nota + kaç koma tiz/pes (La–Si arası Kürdi ailesi bemolle yazılır)
+  const NAT = [[0, "Sol"], [9, "La"], [18, "Si"], [22, "Do"], [31, "Re"], [40, "Mi"], [44, "Fa"], [53, "Sol"]];
+  const SUP = { 1: "¹", 4: "⁴", 5: "⁵", 8: "⁸" };
+  function written(r) {
+    for (let i = 0; i < NAT.length - 1; i++) {
+      const [a, na] = NAT[i], [b, nb] = NAT[i + 1];
+      if (r < a || r >= b) continue;
+      if (r === a) return na;
+      if (b - r === 1) return nb + "♭¹";
+      if (na === "La") return nb + "♭" + SUP[b - r];
+      return na + "♯" + SUP[r - a];
+    }
+  }
+  function nearestPerde(p) {
+    const o0 = Math.floor(p / 53);
+    let best = null;
+    for (const o of [o0 - 1, o0, o0 + 1]) for (const [r] of MID) {
+      const d = p - (o * 53 + r);
+      if (!best || Math.abs(d) < Math.abs(best.d)) best = { o, r, d };
+    }
+    return best;
+  }
+  // Ahenk: Rast perdesinin verdiği ses ve buna karşılık La4'ün yazılı koma konumu (K)
+  const AHENK = [["bolahenk", "Bolahenk", "Re", 31], ["kiz", "Kız", "Mi", 22], ["mustahsen", "Müstahsen", "Fa", 18],
+    ["supurde", "Süpürde", "Do", 40], ["davud", "Davud", "Si", 44], ["sah", "Şah", "La", 53], ["mansur", "Mansur", "Sol", 62]];
+  $("ahenk").innerHTML = AHENK.map(([v, n, r]) => `<option value="${v}">${n} (Rast = ${r})</option>`).join("");
+  const ahenkK = () => (AHENK.find(a => a[0] === state.ahenk) || AHENK[0])[3];
+  function perdeOf(f) {
+    const p = 53 * Math.log2(f / state.ref) + ahenkK();
+    const n = nearestPerde(p);
+    if (n.o < -2 || n.o > 2) return null;
+    return { name: perdeName(n.o, n.r), written: written(n.r), koma: n.d, cents: n.d * 1200 / 53 };
+  }
+
+  // ---------- Çalgılar ----------
+  const STRINGS = {
+    guitar: [40, 45, 50, 55, 59, 64], bass: [28, 33, 38, 43], violin: [55, 62, 69, 76], viola: [48, 55, 62, 69],
+    cello: [36, 43, 50, 57], contrabass: [28, 33, 38, 43], ukulele: [67, 60, 64, 69]
+  };
+  const TURK = ["kanun", "ud", "tanbur", "kemence", "ney", "baglama", "turk"];
+  const isTurk = () => TURK.includes(state.instr);
+  const isPiano = () => state.instr === "piano";
+  const stringsFor = m => m < state.s2 ? 1 : m < state.s3 ? 2 : 3;
+  const PIANO_TYPES = { grand: [29, 45], upright: [25, 42] };
+
+  // ---------- FFT ----------
+  function fft(re, im, inv) {
+    const n = re.length;
+    for (let i = 1, j = 0; i < n; i++) {
+      let bit = n >> 1;
+      for (; j & bit; bit >>= 1) j ^= bit;
+      j ^= bit;
+      if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; }
+    }
+    for (let len = 2; len <= n; len <<= 1) {
+      const ang = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang), h = len >> 1;
+      for (let i = 0; i < n; i += len) {
+        let cr = 1, ci = 0;
+        for (let j = 0; j < h; j++) {
+          const a = i + j, b = a + h;
+          const tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+          re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+          const t = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = t;
+        }
+      }
+    }
+  }
+
+  // ---------- Ses girişi ----------
+  let ac = null, stream = null, srcNode = null, tapNode = null, muteNode = null, workletReady = false;
+  let fs = 48000, ring = null, ringPos = 0, total = 0, running = false, mixR = null, mixI = null;
+  let level = 0, rmsHist = [], onsetAt = -1, lastOnset = -1e12;
+  const GATE = 0.0015;
+  const WORKLET = `class AkortTap extends AudioWorkletProcessor {
+    constructor() { super(); this.buf = new Float32Array(2048); this.n = 0; }
+    process(inputs) {
+      const ch = inputs[0] && inputs[0][0];
+      if (ch) for (let i = 0; i < ch.length; i++) {
+        this.buf[this.n++] = ch[i];
+        if (this.n === this.buf.length) { this.port.postMessage(this.buf, [this.buf.buffer]); this.buf = new Float32Array(2048); this.n = 0; }
+      }
+      return true;
+    }
+  }
+  registerProcessor("akort-tap", AkortTap);`;
+
+  function push(c) {
+    const n = c.length, R = ring.length, first = Math.min(n, R - ringPos);
+    ring.set(c.subarray(0, first), ringPos);
+    if (first < n) ring.set(c.subarray(first), 0);
+    ringPos = (ringPos + n) % R; total += n;
+    let s = 0;
+    for (let i = 0; i < n; i++) s += c[i] * c[i];
+    level = Math.sqrt(s / n);
+    // Yeni vuruş (atak): seviye son ~0,2 sn ortalamasının 2,5 katını aşarsa ölçüm penceresi baştan başlar
+    const prev = rmsHist.length ? rmsHist.reduce((a, b) => a + b) / rmsHist.length : 0;
+    if (level > GATE && level > 2.5 * prev + 1e-4 && total - lastOnset > fs * 0.15) { onsetAt = total; lastOnset = total; }
+    rmsHist.push(level); if (rmsHist.length > 4) rmsHist.shift();
+  }
+  function recent(n) {
+    n = Math.min(n, total, ring.length);
+    const out = new Float32Array(n), start = ringPos - n;
+    if (start >= 0) out.set(ring.subarray(start, ringPos));
+    else { out.set(ring.subarray(ring.length + start)); out.set(ring.subarray(0, ringPos), -start); }
+    return out;
+  }
+
+  async function startMic() {
+    $("msg").hidden = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return showMsg("Bu tarayıcı mikrofona erişemiyor. Sayfayı https üzerinden açın.");
+    }
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      await ac.resume();
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+    } catch (e) {
+      return showMsg("Mikrofon izni verilmedi. Tarayıcının adres çubuğundan izin verip yeniden deneyin.");
+    }
+    fs = ac.sampleRate;
+    ring = new Float32Array(Math.ceil(fs * 8)); mixR = new Float32Array(ring.length); mixI = new Float32Array(ring.length);
+    ringPos = 0; total = 0; onsetAt = -1; rmsHist = [];
+    srcNode = ac.createMediaStreamSource(stream);
+    muteNode = ac.createGain(); muteNode.gain.value = 0;
+    if (ac.audioWorklet) {
+      if (!workletReady) { await ac.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: "application/javascript" }))); workletReady = true; }
+      tapNode = new AudioWorkletNode(ac, "akort-tap");
+      tapNode.port.onmessage = e => push(e.data);
+    } else {
+      tapNode = ac.createScriptProcessor(2048, 1, 1);
+      tapNode.onaudioprocess = e => push(new Float32Array(e.inputBuffer.getChannelData(0)));
+    }
+    srcNode.connect(tapNode); tapNode.connect(muteNode).connect(ac.destination);
+    running = true;
+    $("micBtn").textContent = "Durdur"; $("micBtn").classList.add("running");
+    requestAnimationFrame(loop);
+  }
+  function stopMic() {
+    running = false;
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    try { srcNode.disconnect(); tapNode.disconnect(); muteNode.disconnect(); } catch (e) {}
+    $("micBtn").textContent = "Mikrofonu aç"; $("micBtn").classList.remove("running");
+    $("levelBar").style.width = "0";
+  }
+  const showMsg = t => { $("msg").textContent = t; $("msg").hidden = false; };
+  $("micBtn").onclick = () => running ? stopMic() : startMic();
+
+  // Referans ses: tele dokununca 2 sn çalar
+  function playRef(f) {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    ac.resume();
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+    o.type = "triangle"; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+    g.gain.setValueAtTime(0.25, t + 1.4); g.gain.exponentialRampToValueAtTime(0.0001, t + 2);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + 2.05);
+  }
+
+  // ---------- Perde algılama (McLeod NSDF, FFT ile) ----------
+  function mpm(x) {
+    const N = x.length, size = N * 2;
+    let mean = 0; for (let i = 0; i < N; i++) mean += x[i]; mean /= N;
+    const re = new Float64Array(size), im = new Float64Array(size);
+    for (let i = 0; i < N; i++) re[i] = x[i] - mean;
+    const xs = re.slice(0, N);
+    fft(re, im, false);
+    for (let i = 0; i < size; i++) { re[i] = re[i] * re[i] + im[i] * im[i]; im[i] = 0; }
+    fft(re, im, true);
+    const maxT = N >> 1, nsdf = new Float64Array(maxT);
+    let m = 0; for (let i = 0; i < N; i++) m += 2 * xs[i] * xs[i];
+    for (let t = 0; t < maxT; t++) {
+      if (t > 0) m -= xs[t - 1] * xs[t - 1] + xs[N - t] * xs[N - t];
+      nsdf[t] = m > 0 ? 2 * (re[t] / size) / m : 0;
+    }
+    const minT = Math.max(2, Math.floor(fs / 5000));
+    let i = 1;
+    while (i < maxT && nsdf[i] > 0) i++;
+    const peaks = []; let best = -1, bi = -1;
+    for (; i < maxT - 1; i++) {
+      if (nsdf[i] > 0) { if (nsdf[i] > best && i >= minT) { best = nsdf[i]; bi = i; } }
+      else if (bi > 0) { peaks.push(bi); best = -1; bi = -1; }
+    }
+    if (bi > 0 && bi < maxT - 2) peaks.push(bi);
+    if (!peaks.length) return null;
+    const hi = Math.max(...peaks.map(p => nsdf[p]));
+    const p = peaks.find(p => nsdf[p] >= 0.9 * hi);
+    const a = nsdf[p - 1], b = nsdf[p], c = nsdf[p + 1], den = a - 2 * b + c;
+    const d = den ? 0.5 * (a - c) / den : 0;
+    return { f: fs / (p + d), clarity: b - 0.25 * (a - c) * d };
+  }
+
+  // ---------- Dar bant yakınlaştırılmış spektrum ----------
+  // Sinyal fc ile taban banda indirilir, üçgen filtreyle süzülüp seyreltilir; ardından ±half Hz aralığı
+  // M noktada Hann pencereli DFT ile taranır. Uzun pencerede (2–6 sn) 0,2–0,5 Hz çözünürlük verir.
+  function narrowband(x, fc, half, M) {
+    const L = x.length;
+    let D = Math.max(1, Math.floor(fs / Math.max(24, 6 * half)));
+    const fd = fs / D, K = Math.floor((L - 2 * D) / D) + 1;
+    if (K < 16) return null;
+    const w = -2 * Math.PI * fc / fs, cw = Math.cos(w), sw = Math.sin(w);
+    let c = 1, s = 0;
+    for (let n = 0; n < L; n++) {
+      mixR[n] = x[n] * c; mixI[n] = x[n] * s;
+      const t = c * cw - s * sw; s = c * sw + s * cw; c = t;
+      if ((n & 1023) === 0) { const g = 1 / Math.hypot(c, s); c *= g; s *= g; }
+    }
+    const yr = new Float64Array(K), yi = new Float64Array(K), env = new Float64Array(K), norm = 1 / (D * D);
+    for (let k = 0; k < K; k++) {
+      const a = k * D; let sr = 0, si = 0;
+      for (let j = 0; j < 2 * D; j++) { const wt = j < D ? j + 1 : 2 * D - j; sr += wt * mixR[a + j]; si += wt * mixI[a + j]; }
+      yr[k] = sr * norm; yi[k] = si * norm; env[k] = Math.hypot(yr[k], yi[k]);
+    }
+    for (let k = 0; k < K; k++) { const h = 0.5 - 0.5 * Math.cos(2 * Math.PI * k / (K - 1)); yr[k] *= h; yi[k] *= h; }
+    const df = new Float64Array(M), db = new Float64Array(M);
+    for (let m = 0; m < M; m++) {
+      const off = -half + 2 * half * m / (M - 1), th = -2 * Math.PI * off / fd, pc = Math.cos(th), ps = Math.sin(th);
+      let cr = 1, ci = 0, xr = 0, xi = 0;
+      for (let k = 0; k < K; k++) {
+        xr += yr[k] * cr - yi[k] * ci; xi += yr[k] * ci + yi[k] * cr;
+        const t = cr * pc - ci * ps; ci = cr * ps + ci * pc; cr = t;
+      }
+      df[m] = off; db[m] = 10 * Math.log10(xr * xr + xi * xi + 1e-24);
+    }
+    return { df, db, env, fd };
+  }
+
+  function pickPeaks(r, count, T) {
+    const { db, df } = r, M = db.length, step = df[1] - df[0];
+    let max = -Infinity; for (const v of db) if (v > max) max = v;
+    const cand = [];
+    for (let i = 1; i < M - 1; i++) if (db[i] > db[i - 1] && db[i] >= db[i + 1] && db[i] > max - 20) cand.push(i);
+    cand.sort((a, b) => db[b] - db[a]);
+    const out = [], minSep = 1 / T;
+    for (const i of cand) {
+      const a = db[i - 1], b = db[i], c = db[i + 1], den = a - 2 * b + c, p = den ? 0.5 * (a - c) / den : 0;
+      const hz = df[i] + p * step, amp = b - 0.25 * (a - c) * p;
+      if (out.every(o => Math.abs(o.hz - hz) >= minSep)) out.push({ hz, amp });
+      if (out.length === count) break;
+    }
+    return out.sort((a, b) => a.hz - b.hz);
+  }
+
+  // Zarftaki dalgalanmanın baskın frekansı = vuru sayısı / sn
+  function envBeat(env, fd) {
+    const K = env.length, T = K / fd;
+    if (T < 1) return null;
+    const y = new Float64Array(K);
+    let sx = 0, sy = 0, sxx = 0, sxy = 0;
+    for (let k = 0; k < K; k++) { y[k] = Math.log(env[k] + 1e-12); sx += k; sy += y[k]; sxx += k * k; sxy += k * y[k]; }
+    const b = (K * sxy - sx * sy) / (K * sxx - sx * sx), a = (sy - b * sx) / K;
+    for (let k = 0; k < K; k++) y[k] = (y[k] - a - b * k) * (0.5 - 0.5 * Math.cos(2 * Math.PI * k / (K - 1)));
+    const fMin = Math.max(0.2, 1.5 / T), fMax = Math.min(12, fd / 2 - 0.5);
+    let best = 0, bf = 0, sum = 0, cnt = 0;
+    for (let f = fMin; f <= fMax; f += 0.02) {
+      const th = 2 * Math.PI * f / fd; let xr = 0, xi = 0;
+      for (let k = 0; k < K; k++) { xr += y[k] * Math.cos(th * k); xi += y[k] * Math.sin(th * k); }
+      const mag = Math.hypot(xr, xi); sum += mag; cnt++;
+      if (mag > best) { best = mag; bf = f; }
+    }
+    return cnt && best > 3 * (sum / cnt) ? bf : null;
+  }
+
+  // ---------- Döngü ----------
+  let lastPitch = 0, lastZoom = 0, lastSignal = 0, hist = [], shown = null;
+  let autoNote = null, candNote = null, candCount = 0, lockNote = null, frozen = false, result = null;
+
+  function loop(now) {
+    if (!running) return;
+    requestAnimationFrame(loop);
+    $("levelBar").style.width = Math.min(100, Math.max(0, (20 * Math.log10(level + 1e-9) + 60) / 60 * 100)) + "%";
+    if (now - lastPitch > 50 && total >= 4096) { lastPitch = now; detect(now); }
+    if (isPiano() && !frozen && now - lastZoom > 180) { lastZoom = now; analyzePiano(); }
+  }
+
+  function detect(now) {
+    const N = fs > 60000 ? 8192 : 4096, x = recent(N);
+    let s = 0; for (let i = 0; i < N; i++) s += x[i] * x[i];
+    if (Math.sqrt(s / N) < GATE) { if (now - lastSignal > 1200) setStale(true); return; }
+    const r = mpm(x);
+    if (!r || r.clarity < 0.75 || r.f < 20 || r.f > 5000) return;
+    lastSignal = now; setStale(false);
+    if (shown && Math.abs(1200 * Math.log2(r.f / shown)) > 40) hist = [];
+    hist.push(r.f); if (hist.length > 5) hist.shift();
+    shown = [...hist].sort((a, b) => a - b)[hist.length >> 1];
+    if (isPiano()) pianoDetected(shown); else showSimple(shown);
+  }
+  function setStale(on) { for (const id of ["sNote", "sCents", "sHz", "sPerde"]) $(id).classList.toggle("stale", on); }
+
+  // ---------- Sade mod ----------
+  function buildGauge() {
+    let h = `<path class="arc" d="M14,104 A86,86 0 0 1 186,104"/>`;
+    const pt = (c, r) => { const a = (c / 50) * Math.PI / 2; return [100 + r * Math.sin(a), 104 - r * Math.cos(a)]; };
+    const [zx1, zy1] = pt(-5, 86), [zx2, zy2] = pt(5, 86);
+    h += `<path class="zone" d="M${zx1},${zy1} A86,86 0 0 1 ${zx2},${zy2}"/>`;
+    for (let c = -50; c <= 50; c += 5) {
+      const major = c % 25 === 0, [x1, y1] = pt(c, major ? 74 : 79), [x2, y2] = pt(c, 86);
+      h += `<line class="tick${major ? " major" : ""}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+      if (major) { const [tx, ty] = pt(c, 64); h += `<text x="${tx}" y="${ty + 3}">${c > 0 ? "+" + c : c === 0 ? "0" : "−" + -c}</text>`; }
+    }
+    $("ticks").innerHTML = h;
+  }
+  function showSimple(f) {
+    const exact = 69 + 12 * Math.log2(f / state.ref), m = Math.round(exact), c12 = (exact - m) * 100;
+    const per = isTurk() ? perdeOf(f) : null;
+    const c = per && state.needle === "perde" ? per.cents : c12;
+    $("needle").style.transform = `rotate(${Math.max(-50, Math.min(50, c)) / 50 * 90}deg)`;
+    $("sNote").textContent = noteTr(m);
+    $("sNote").classList.toggle("ok", Math.abs(c) < 3);
+    $("sCents").textContent = sfmt(c, 1) + " cent";
+    $("sHz").textContent = `${noteEn(m)} · ${fmt(f, 2)} Hz`;
+    $("sPerde").hidden = !per;
+    if (per) $("sPerde").innerHTML = `${per.name} – ${per.written}<small>${sfmt(per.koma, 2)} koma</small>`;
+    const strs = STRINGS[state.instr];
+    if (strs) {
+      let bi = -1, bd = 1e9;
+      strs.forEach((sm, i) => { const d = Math.abs(exact - sm); if (d < bd) { bd = d; bi = i; } });
+      [...$("strings").children].forEach((b, i) => b.classList.toggle("near", i === bi && bd < 3));
+    }
+  }
+  function buildStrings() {
+    const strs = STRINGS[state.instr];
+    $("strings").innerHTML = strs ? strs.map(m => `<button data-m="${m}">${noteTr(m)}<small>${fmt(f12(m), 1)}</small></button>`).join("") : "";
+    $("stringsHint").hidden = !strs;
+  }
+  $("strings").addEventListener("click", e => { const b = e.target.closest("button"); if (b) playRef(f12(+b.dataset.m)); });
+
+  // ---------- Piyano modu ----------
+  const target = () => lockNote ?? autoNote;
+  function pianoDetected(f) {
+    const m = Math.round(69 + 12 * Math.log2(f / state.ref));
+    if (m < 21 || m > 108) return;
+    if (m === candNote) candCount++; else { candNote = m; candCount = 1; }
+    if (lockNote == null && candCount >= 3 && m !== autoNote) { autoNote = m; result = null; renderPianoHead(); drawAll(); }
+    const c = (69 + 12 * Math.log2(f / state.ref) - m) * 100;
+    $("pNote").querySelector("small").textContent = headSub(`algılanan ${noteTr(m)} ${sfmt(c, 1)} c`);
+  }
+  function headSub(extra) {
+    const m = target();
+    if (m == null) return "Bir tuşa basın ya da aşağıdaki klavyeden seçin";
+    return `${noteEn(m)} · temel ${fmt(f12(m), 2)} Hz` + (extra ? ` · ${extra}` : "");
+  }
+  function renderPianoHead() {
+    const m = target();
+    $("pNote").firstChild.textContent = m == null ? "—" : noteTr(m);
+    $("pNote").querySelector("small").textContent = headSub();
+    const n = m == null ? 0 : stringsFor(m);
+    $("pBadge").hidden = !n;
+    $("pBadge").textContent = n === 1 ? "Tek telli" : n + " telli";
+    $("pBadge").style.background = n === 3 ? "var(--brass)" : n === 2 ? "var(--beat)" : "var(--s1)";
+    $("lockBtn").textContent = lockNote == null ? "Otomatik nota" : `Kilitli: ${noteTr(lockNote)} ✕`;
+    $("lockBtn").setAttribute("aria-pressed", String(lockNote != null));
+    [...$("partialSeg").children].forEach(b => { b.disabled = m != null && +b.dataset.v * f12(m) > fs * 0.45; });
+  }
+
+  function analyzePiano() {
+    const m = target();
+    if (m == null || !ring) return;
+    const n = state.partial, fp = n * f12(m);
+    const since = onsetAt >= 0 ? total - onsetAt : total;
+    const L = Math.min(Math.floor(state.win * fs), since, ring.length, total), T = L / fs;
+    $("winBar").style.width = Math.min(100, T / state.win * 100) + "%";
+    const resHz = 1 / Math.max(T, 0.1);
+    $("winText").textContent = `Pencere ${fmt(T, 1)} / ${state.win} s · çözünürlük ≈ ${fmt(resHz, 2)} Hz (${fmt(1200 * Math.log2(1 + resHz / fp), 1)} c, ${n}. kısmide)`;
+    if (fp > fs * 0.45 || T < 0.5 || level < GATE) return; // ses sönünce son sonuç ekranda kalır
+    const x = recent(L);
+    const coarse = narrowband(x, fp, fp * (Math.pow(2, 80 / 1200) - 1), 241);
+    if (!coarse) return;
+    let bi = 0; coarse.db.forEach((v, i) => { if (v > coarse.db[bi]) bi = i; });
+    const fc = fp + coarse.df[bi], half = fc * (Math.pow(2, state.span / 1200) - 1);
+    const fine = narrowband(x, fc, half, 401);
+    if (!fine) return;
+    const cents = Array.from(fine.df, d => 1200 * Math.log2((fc + d) / fp));
+    const strings = stringsFor(m);
+    const peaks = pickPeaks(fine, strings, T).map(p => ({ ...p, f: fc + p.hz, cents: 1200 * Math.log2((fc + p.hz) / fp) }));
+    result = { m, n, fp, cents, db: fine.db, peaks, beat: envBeat(fine.env, fine.fd), env: fine.env, fd: fine.fd, T, strings };
+    if (T >= 1.5 && peaks.length) {
+      let wsum = 0, csum = 0;
+      for (const p of peaks) { const w = Math.pow(10, p.amp / 20); wsum += w; csum += w * p.cents; }
+      tuningMap[m] = { c: csum / wsum, n, spread: peaks.length > 1 ? peaks[peaks.length - 1].cents - peaks[0].cents : 0, k: peaks.length };
+      saveMap();
+    }
+    renderResult();
+    drawAll();
+  }
+
+  const PEAK_COLORS = () => [C.brass, C.beat, C.good];
+  function renderResult() {
+    const r = result;
+    if (!r) { $("peakList").innerHTML = `<span class="note-small">Henüz ölçüm yok.</span>`; $("beatText").textContent = "—"; return; }
+    const cols = PEAK_COLORS();
+    let h = r.peaks.map((p, i) => `<div class="p"><span class="sw" style="background:${cols[i]}"></span>${i + 1}. tepe · ${fmt(p.f, 3)} Hz · ${sfmt(p.cents, 2)} c · temel ≈ ${fmt(p.f / r.n, 3)} Hz</div>`).join("");
+    for (let i = 1; i < r.peaks.length; i++) {
+      const d = r.peaks[i].f - r.peaks[i - 1].f;
+      h += `<div class="p" style="color:var(--muted)">${i}↔${i + 1}: Δ ${fmt(d, 2)} Hz = ${fmt(r.peaks[i].cents - r.peaks[i - 1].cents, 2)} c → ${fmt(d, 2)} vuru/sn</div>`;
+    }
+    if (r.strings > 1 && r.peaks.length < r.strings) {
+      h += `<div class="note-small">${r.strings} tel var ama ${r.peaks.length} tepe ayrıştı: teller ${fmt(1200 * Math.log2(1 + 1 / (r.T * r.fp)), 1)} c'ten yakın olabilir ya da pencere kısa. Vuruya bakın.</div>`;
+    }
+    $("peakList").innerHTML = h || `<span class="note-small">Belirgin tepe yok.</span>`;
+    $("beatText").textContent = r.beat ? `≈ ${fmt(r.beat, 2)} vuru/sn` : "belirgin vuru yok";
+  }
+
+  // ---------- Çizim ----------
+  let C = {};
+  function readColors() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ["panel", "ink", "muted", "line", "brass", "beat", "beat-off", "good", "warn", "bad", "s1", "wkey", "bkey"]) C[k] = cs.getPropertyValue("--" + k).trim();
+  }
+  function fit(cv) {
+    const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    return [g, w, h];
+  }
+  const MONO = "500 11px 'IBM Plex Mono', ui-monospace, monospace";
+
+  function drawSpec() {
+    const [g, w, h] = fit($("spec"));
+    g.font = MONO;
+    if (!result) {
+      g.fillStyle = C.muted; g.textAlign = "center";
+      g.fillText(running ? "Bir tuşa basın; spektrum pencere doldukça netleşir" : "Önce mikrofonu açın", w / 2, h / 2);
+      return;
+    }
+    const r = result, cs = r.cents, c0 = cs[0], c1 = cs[cs.length - 1];
+    const L = 12, R = 12, T = 30 + 14 * r.peaks.length, B = 24;
+    const X = c => L + (c - c0) / (c1 - c0) * (w - L - R);
+    let dmax = -Infinity; for (const v of r.db) if (v > dmax) dmax = v;
+    const range = 50, Y = d => T + Math.min(1, Math.max(0, (dmax - d) / range)) * (h - T - B);
+    const step = state.span <= 10 ? 2 : state.span <= 25 ? 5 : 10;
+    g.textAlign = "center"; g.lineWidth = 1;
+    for (let c = Math.ceil(c0 / step) * step; c <= c1; c += step) {
+      g.strokeStyle = C.line; g.beginPath(); g.moveTo(X(c), T - 6); g.lineTo(X(c), h - B); g.stroke();
+      g.fillStyle = C.muted; g.fillText((c > 0 ? "+" : c < 0 ? "−" : "") + Math.abs(c) + " c", X(c), h - 7);
+    }
+    if (c0 <= 0 && c1 >= 0) {
+      g.strokeStyle = C.ink; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(X(0), T - 6); g.lineTo(X(0), h - B); g.stroke(); g.setLineDash([]);
+    }
+    g.textAlign = "left"; g.fillStyle = C.muted;
+    g.fillText(`${r.n}. kısmi · hedef ${fmt(r.fp, 2)} Hz (kesikli çizgi = 0 c)`, L, 14);
+    g.beginPath(); g.strokeStyle = C.ink; g.lineWidth = 1.6;
+    cs.forEach((c, i) => { const x = X(c), y = Y(r.db[i]); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.stroke();
+    const cols = PEAK_COLORS();
+    r.peaks.forEach((p, i) => {
+      const x = X(p.cents), y = Y(p.amp);
+      g.strokeStyle = cols[i]; g.fillStyle = cols[i]; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x, h - B); g.stroke();
+      g.beginPath(); g.arc(x, y, 5, 0, Math.PI * 2); g.fill();
+      g.textAlign = "center"; g.font = "700 12px 'IBM Plex Mono', ui-monospace, monospace";
+      const tx = Math.min(w - 40, Math.max(40, x));
+      g.fillText(`${i + 1}: ${sfmt(p.cents, 1)} c`, tx, 30 + i * 14);
+      g.globalAlpha = 0.35; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(x, 34 + i * 14); g.lineTo(x, y); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+      g.font = MONO;
+    });
+  }
+
+  function drawEnv() {
+    const [g, w, h] = fit($("envC"));
+    if (!result) return;
+    const env = result.env, K = env.length, db = Array.from(env, v => 20 * Math.log10(v + 1e-12));
+    const mx = Math.max(...db), mn = mx - 40;
+    g.strokeStyle = C.beat; g.lineWidth = 1.5; g.beginPath();
+    db.forEach((v, k) => { const x = 6 + k / (K - 1) * (w - 12), y = 6 + (mx - Math.max(mn, v)) / 40 * (h - 22); k ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.stroke();
+    g.font = MONO; g.fillStyle = C.muted; g.textAlign = "left"; g.fillText("0 s", 6, h - 4);
+    g.textAlign = "right"; g.fillText(fmt(result.T, 1) + " s", w - 6, h - 4);
+  }
+
+  // Klavye geometrisi: 52 beyaz tuş, siyahlar beyazın sağ kenarına ortalanır
+  function keyGeom(w) {
+    const ww = w / 52, bw = ww * 0.62, keys = {};
+    let wi = 0;
+    for (let m = 21; m <= 108; m++) if (!isBlack(m)) keys[m] = { x: wi++ * ww, w: ww, black: false };
+    for (let m = 21; m <= 108; m++) if (isBlack(m)) keys[m] = { x: keys[m - 1].x + ww - bw / 2, w: bw, black: true };
+    for (const k of Object.values(keys)) k.cx = k.x + k.w / 2;
+    return keys;
+  }
+  const STRIP = 10;
+  function spreadColor(e) { return e.k < 2 ? C.good : e.spread < 1 ? C.good : e.spread < 3 ? C.warn : C.bad; }
+  function drawKb() {
+    const [g, w, h] = fit($("kb")), keys = keyGeom(w), kh = h - STRIP - 2, tm = target();
+    for (let m = 21; m <= 108; m++) {
+      const k = keys[m], n = stringsFor(m);
+      g.fillStyle = n === 3 ? C.brass : n === 2 ? C.beat : C.s1;
+      if (!k.black) g.fillRect(k.x, 0, k.w + 0.5, STRIP - 3);
+    }
+    for (const black of [false, true]) for (let m = 21; m <= 108; m++) {
+      const k = keys[m]; if (k.black !== black) continue;
+      const kh2 = black ? kh * 0.62 : kh;
+      g.fillStyle = m === tm ? C.brass : black ? C.bkey : C.wkey;
+      g.strokeStyle = C.line; g.lineWidth = 1;
+      g.fillRect(k.x, STRIP, k.w, kh2); g.strokeRect(k.x + 0.5, STRIP + 0.5, k.w - 1, kh2 - 1);
+      const e = tuningMap[m];
+      if (e && stringsFor(m) > 1) {
+        g.fillStyle = spreadColor(e); g.beginPath(); g.arc(k.cx, STRIP + kh2 - Math.min(8, k.w / 2), Math.min(4, k.w / 3), 0, Math.PI * 2); g.fill();
+      }
+      if (!black && m % 12 === 0) { g.fillStyle = C.muted; g.font = "500 9px 'IBM Plex Mono', monospace"; g.textAlign = "center"; g.fillText("Do" + (m / 12 - 1), k.cx, STRIP + kh - 16); }
+    }
+  }
+  // Tipik gerilme (Railsback) eğrisinin kaba yaklaşımı: La0 ≈ −20 c, Do8 ≈ +30 c
+  const railsback = m => { if (m >= 69) { const x = (m - 69) / 39; return 10 * x + 20 * x ** 3; } const x = (m - 69) / 48; return 6 * x + 14 * x ** 3; };
+  function drawMap() {
+    const [g, w, h] = fit($("map")), keys = keyGeom(w), R = 40, T = 8, B = 8, Y = c => T + (R - Math.max(-R, Math.min(R, c))) / (2 * R) * (h - T - B);
+    g.font = MONO; g.lineWidth = 1;
+    for (const c of [-30, -20, -10, 0, 10, 20, 30]) {
+      g.strokeStyle = c === 0 ? C.muted : C.line; g.beginPath(); g.moveTo(0, Y(c)); g.lineTo(w, Y(c)); g.stroke();
+      g.fillStyle = C.muted; g.textAlign = "left"; g.fillText((c > 0 ? "+" : c < 0 ? "−" : "") + Math.abs(c), 4, Y(c) - 2);
+    }
+    g.strokeStyle = C.muted; g.setLineDash([5, 4]); g.beginPath();
+    for (let m = 21; m <= 108; m++) { const x = keys[m].cx, y = Y(railsback(m)); m === 21 ? g.moveTo(x, y) : g.lineTo(x, y); }
+    g.stroke(); g.setLineDash([]);
+    const tm = target();
+    for (const [mk, e] of Object.entries(tuningMap)) {
+      const m = +mk, k = keys[m]; if (!k) continue;
+      g.fillStyle = m === tm ? C.brass : C.beat;
+      g.beginPath(); g.arc(k.cx, Y(e.c), m === tm ? 5 : 3.5, 0, Math.PI * 2); g.fill();
+    }
+    g.textAlign = "right"; g.fillStyle = C.muted; g.fillText("kesikli: tipik gerilme eğrisi (yaklaşık)", w - 6, h - 6);
+  }
+  function drawAll() { if (!isPiano()) return; drawSpec(); drawEnv(); drawKb(); drawMap(); }
+
+  $("kb").addEventListener("click", e => {
+    const rect = $("kb").getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const keys = keyGeom(rect.width), kh = rect.height - STRIP - 2;
+    let hit = null;
+    for (let m = 21; m <= 108; m++) { const k = keys[m]; if (k.black && x >= k.x && x <= k.x + k.w && y <= STRIP + kh * 0.62) hit = m; }
+    if (hit == null) for (let m = 21; m <= 108; m++) { const k = keys[m]; if (!k.black && x >= k.x && x < k.x + k.w) hit = m; }
+    if (hit == null) return;
+    setLock(lockNote === hit ? null : hit);
+  });
+  function setLock(m) {
+    lockNote = m; result = null;
+    renderPianoHead(); renderResult(); drawAll();
+  }
+  $("lockBtn").onclick = () => setLock(lockNote == null ? target() : null);
+  $("freezeBtn").onclick = () => { frozen = !frozen; $("freezeBtn").textContent = frozen ? "Devam et" : "Dondur"; $("freezeBtn").setAttribute("aria-pressed", String(frozen)); };
+  document.addEventListener("keydown", e => {
+    if (!isPiano() || e.target.matches("input, select")) return;
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      const m = target() ?? 69;
+      setLock(Math.min(108, Math.max(21, m + (e.key === "ArrowRight" ? 1 : -1))));
+    }
+  });
+  $("clearMap").onclick = () => { if (confirm("Akort haritasındaki tüm ölçümler silinsin mi?")) { tuningMap = {}; saveMap(); drawAll(); } };
+
+  // ---------- Kontroller ----------
+  function seg(id, key, cast = Number, after) {
+    const el = $(id);
+    const sync = () => [...el.children].forEach(b => b.setAttribute("aria-pressed", String(cast(b.dataset.v) === state[key])));
+    el.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b || b.disabled) return;
+      state[key] = cast(b.dataset.v); sync(); save(); if (after) after();
+    });
+    sync();
+  }
+  $("partialSeg").innerHTML = [1, 2, 3, 4, 5, 6].map(n => `<button data-v="${n}">${n}</button>`).join("");
+  const reAnalyze = () => { result = null; renderResult(); drawAll(); };
+  seg("partialSeg", "partial", Number, reAnalyze);
+  seg("winSeg", "win", Number, reAnalyze);
+  seg("spanSeg", "span", Number, reAnalyze);
+  seg("needleMode", "needle", String, () => { if (shown) showSimple(shown); });
+  const noteOpts = () => { let h = ""; for (let m = 21; m <= 60; m++) h += `<option value="${m}">${noteTr(m)}</option>`; return h; };
+  $("s2").innerHTML = noteOpts(); $("s3").innerHTML = noteOpts();
+  const syncStrings = () => { $("s2").value = state.s2; $("s3").value = state.s3; renderPianoHead(); drawAll(); };
+  seg("pianoType", "pianoType", String, () => { [state.s2, state.s3] = PIANO_TYPES[state.pianoType]; save(); syncStrings(); });
+  $("s2").onchange = e => { state.s2 = +e.target.value; if (state.s3 < state.s2) state.s3 = state.s2; save(); syncStrings(); };
+  $("s3").onchange = e => { state.s3 = +e.target.value; if (state.s2 > state.s3) state.s2 = state.s3; save(); syncStrings(); };
+
+  $("ref").value = state.ref;
+  $("ref").addEventListener("change", e => {
+    const v = parseFloat(String(e.target.value).replace(",", "."));
+    state.ref = v >= 400 && v <= 480 ? v : 440; e.target.value = state.ref; save();
+    buildStrings(); renderPianoHead(); if (shown && !isPiano()) showSimple(shown);
+  });
+  $("ahenk").value = state.ahenk;
+  $("ahenk").onchange = e => { state.ahenk = e.target.value; save(); if (shown) showSimple(shown); };
+
+  function setInstr(v) {
+    state.instr = $("instr").querySelector(`option[value="${v}"]`) ? v : "chromatic";
+    $("instr").value = state.instr;
+    document.body.classList.toggle("piano", isPiano());
+    $("simpleView").hidden = isPiano(); $("pianoView").hidden = !isPiano();
+    $("turkOpts").hidden = !isTurk();
+    $("sPerde").hidden = true;
+    buildStrings(); renderPianoHead(); renderResult();
+    requestAnimationFrame(drawAll);
+    save();
+  }
+  $("instr").onchange = e => setInstr(e.target.value);
+
+  readColors();
+  const dark = matchMedia("(prefers-color-scheme: dark)");
+  (dark.addEventListener ? dark.addEventListener("change", () => { readColors(); drawAll(); }) : null);
+  window.addEventListener("resize", drawAll);
+  buildGauge();
+  setInstr(state.instr);
+  syncStrings();
+})();
+</script>
+</body>
+</html>

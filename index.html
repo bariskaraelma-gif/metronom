@@ -76,7 +76,11 @@
     border-radius: 20px; padding: 28px 24px; box-sizing: border-box;
     display: flex; flex-direction: column; gap: 24px;
   }
-  h1 { margin: 0; font-size: 15px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .tabs { display: flex; gap: 16px; align-items: baseline; }
+  .tabs h1, .tabs a { margin: 0; font-size: 15px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; padding-bottom: 2px; }
+  .tabs h1 { color: var(--ink); border-bottom: 2px solid var(--brass); }
+  .tabs a { color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; }
+  .tabs a:hover { border-bottom-color: var(--line); }
 
   .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   [hidden] { display: none !important; }
@@ -190,9 +194,7 @@
     .dot { width: 18px; height: 18px; }
   }
   @media (max-width: 520px) and (max-height: 600px) {
-    h1 { visibility: hidden; }
     .device { gap: 6px; }
-    .top { justify-content: flex-end; }
     .lang button { padding: 2px; }
     .lang svg { width: 26px; height: 17px; }
     .bpm { font-size: 46px; }
@@ -208,7 +210,10 @@
 
 <main class="device">
   <div class="top">
-    <h1>Metronom</h1>
+    <nav class="tabs">
+      <h1>Metronom</h1>
+      <a href="akort.html" data-i18n="tuner">Akort</a>
+    </nav>
     <div class="lang">
       <span class="lang-label" id="langLabel">Language:</span>
       <button class="lang-current" id="langBtn" aria-haspopup="true" aria-expanded="false" aria-labelledby="langLabel langBtn"></button>
@@ -472,7 +477,7 @@
       bell: "Ölçü başında zil", bellNote: "Açıkken ilk vuruş daha tiz tıklar; kapalıyken tüm vuruşlar aynı",
       start: "Başlat", stop: "Durdur", hint: "Boşluk: başlat/durdur · ↑↓ tempo ±1 · Shift+↑↓ ±10 · T: ritimle vur",
       minus: "Tempoyu 1 azalt", plus: "Tempoyu 1 artır", editBpm: "Tempoyu yaz",
-      tapTip: "Hızı belirlemek için boş bir yere ritimle dokun", tapCount: "{n}. dokunuş"
+      tapTip: "Hızı belirlemek için boş bir yere ritimle dokun", tapCount: "{n}. dokunuş", tuner: "Akort"
     },
     en: {
       bpmLabel: "beats / minute", meter: "Time signature", volume: "Volume", sound: "Click sound",
@@ -480,7 +485,7 @@
       bell: "Accent on beat one", bellNote: "On: the first beat clicks higher; off: all beats sound the same",
       start: "Start", stop: "Stop", hint: "Space: start/stop · ↑↓ tempo ±1 · Shift+↑↓ ±10 · T: tap tempo",
       minus: "Decrease tempo by 1", plus: "Increase tempo by 1", editBpm: "Type the tempo",
-      tapTip: "Tap an empty spot in rhythm to set the tempo", tapCount: "Tap {n}"
+      tapTip: "Tap an empty spot in rhythm to set the tempo", tapCount: "Tap {n}", tuner: "Tuner"
     }
   };
   const t = key => texts[state.lang][key];
