@@ -500,12 +500,22 @@
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       return showMsg("Bu tarayıcı mikrofona erişemiyor. Sayfayı https üzerinden açın.");
     }
+    // iOS: sesi hem çalıp hem kaydedebilmek için
+    if (navigator.audioSession) try { navigator.audioSession.type = "play-and-record"; } catch (e) {}
+    // Önce mikrofon: iOS'ta mikrofondan önce kurulan ses bağlamı sessiz kalabiliyor
     try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    } catch (e) {
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+      catch (e2) { return showMsg(micError(e2)); }
+    }
+    try {
+      if (ac && ac.state === "closed") ac = null;
       ac = ac || new (window.AudioContext || window.webkitAudioContext)();
       await ac.resume();
-      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
     } catch (e) {
-      return showMsg("Mikrofon izni verilmedi. Tarayıcının adres çubuğundan izin verip yeniden deneyin.");
+      stream.getTracks().forEach(t => t.stop());
+      return showMsg("Ses sistemi başlatılamadı: " + e.message);
     }
     fs = ac.sampleRate;
     ring = new Float32Array(Math.ceil(fs * 8)); mixR = new Float32Array(ring.length); mixI = new Float32Array(ring.length);
@@ -533,6 +543,21 @@
     $("levelBar").style.width = "0";
   }
   const showMsg = t => { $("msg").textContent = t; $("msg").hidden = false; };
+  function micError(e) {
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    switch (e && e.name) {
+      case "NotFoundError": case "DevicesNotFoundError":
+        return "Bu cihazda mikrofon bulunamadı. Bilgisayara bir mikrofon (ya da mikrofonlu kulaklık) takıp yeniden deneyin.";
+      case "NotAllowedError": case "PermissionDeniedError": case "SecurityError":
+        return ios
+          ? "Mikrofon izni kapalı. Ayarlar › Safari › Mikrofon'u \"Sor\" ya da \"İzin Ver\" yapın (ya da adres çubuğundaki aA › Web Sitesi Ayarları › Mikrofon), sonra sayfayı yenileyin."
+          : "Mikrofon izni kapalı. Adres çubuğunun solundaki simgeye tıklayıp Mikrofon'u \"İzin ver\" yapın, sonra sayfayı yenileyin. Windows'ta Ayarlar › Gizlilik › Mikrofon'da tarayıcıya erişim de açık olmalı.";
+      case "NotReadableError": case "TrackStartError":
+        return "Mikrofon başka bir uygulama tarafından kullanılıyor ya da işletim sistemi engelliyor. Diğer uygulamaları kapatıp yeniden deneyin.";
+      default:
+        return "Mikrofon açılamadı (" + (e && (e.name || e.message)) + ").";
+    }
+  }
   $("micBtn").onclick = () => running ? stopMic() : startMic();
 
   // Referans ses: tele dokununca 2 sn çalar
